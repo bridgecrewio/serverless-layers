@@ -5,6 +5,7 @@ module.exports = {
   packageManagerExtraArgs: '',
   libraryFolder: 'node_modules',
   dependenciesPath: './fixtures/package.json',
+  dependenciesLockPath: 'package-lock.json',
   compatibleRuntimes: [ 'nodejs' ],
   compatibleArchitectures: [
     "x86_64",
