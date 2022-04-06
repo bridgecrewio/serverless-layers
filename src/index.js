@@ -232,12 +232,15 @@ class ServerlessLayers {
       hasZipChanged = await this.zipService.hasZipChanged();
     }
 
+    console.log('[serverless-layers-yuval] ', process.env.SLS_LAYERS_FORCE_DEPLOY);
+
     // It checks if something has changed
     const verifyChanges = [
       hasZipChanged,
       hasDepsChanges,
       hasFoldersChanges,
-      hasSettingsChanges
+      hasSettingsChanges,
+      process.env.SLS_LAYERS_FORCE_DEPLOY
     ].some(x => x === true);
 
     // merge package default options
