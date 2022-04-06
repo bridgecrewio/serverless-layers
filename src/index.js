@@ -259,7 +259,7 @@ class ServerlessLayers {
      * it doesn't require re-installing dependencies.
      */
     if (skipInstallation) {
-      this.log(`${chalk.inverse.green(' No changes ')}! Using same layer arn: ${this.logArn(existentLayerArn)}`);
+      this.log(`${chalk.inverse.green(' No changes ')}! Using same layer arnn: ${this.logArn(existentLayerArn)}`);
       this.relateLayerWithFunctions(existentLayerArn);
       return;
     }
