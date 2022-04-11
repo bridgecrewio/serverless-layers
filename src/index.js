@@ -253,6 +253,8 @@ class ServerlessLayers {
       !verifyChanges && !forceInstall && existentLayerArn
     );
 
+    this.log({ skipInstallation });
+
     /**
      * If no changes, and layer arn available,
      * it doesn't require re-installing dependencies.
