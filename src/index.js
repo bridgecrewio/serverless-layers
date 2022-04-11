@@ -232,15 +232,12 @@ class ServerlessLayers {
       hasZipChanged = await this.zipService.hasZipChanged();
     }
 
-    this.log('[serverless-layers-yuval] ', process.env.SLS_LAYERS_FORCE_DEPLOY);
-
     // It checks if something has changed
     const verifyChanges = [
       hasZipChanged,
       hasDepsChanges,
       hasFoldersChanges,
-      hasSettingsChanges,
-      process.env.SLS_LAYERS_FORCE_DEPLOY
+      hasSettingsChanges
     ].some(x => x === true);
 
     // merge package default options
@@ -249,9 +246,11 @@ class ServerlessLayers {
     // It returns the layer arn if exists.
     const existentLayerArn = await this.getLayerArn();
 
+    this.log(`[serverless-layers] - SLS_LAYERS_FORCE_DEPLOY is ${process.env.SLS_LAYERS_FORCE_DEPLOY}`);
+
     // It improves readability
     const skipInstallation = (
-      !verifyChanges && !forceInstall && existentLayerArn
+      !verifyChanges && !forceInstall && existentLayerArn && process.env.SLS_LAYERS_FORCE_DEPLOY !== 'true'
     );
 
     /**
