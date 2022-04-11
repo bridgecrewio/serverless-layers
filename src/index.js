@@ -246,11 +246,11 @@ class ServerlessLayers {
     // It returns the layer arn if exists.
     const existentLayerArn = await this.getLayerArn();
 
-    this.log(`[serverless-layers] - SLS_LAYERS_FORCE_DEPLOY is ${process.env.SLS_LAYERS_FORCE_DEPLOY}`);
+    this.log(`[serverless-layers-yuval] - all condition: verifyChanges: ${verifyChanges} && forceInstall: ${forceInstall} && existentLayerArn: ${existentLayerArn}`);
 
     // It improves readability
     const skipInstallation = (
-      !verifyChanges && !forceInstall && existentLayerArn && process.env.SLS_LAYERS_FORCE_DEPLOY !== 'true'
+      !verifyChanges && !forceInstall && existentLayerArn
     );
 
     /**
