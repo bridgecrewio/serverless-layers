@@ -32,12 +32,20 @@ class Dependencies extends AbstractService {
   }
 
   async run(cmd) {
-    const output = execSync(cmd, {
-      cwd: this.layersPackageDir,
-      env: process.env,
-      maxBuffer: 1024 * 1024 * 500
-    }).toString();
-    return output;
+    if (this.plugin.slsLayersConfig.shouldInstallPackages) {
+      const output = execSync(cmd, {
+        cwd: this.layersPackageDir,
+        env: process.env,
+        maxBuffer: 1024 * 1024 * 500
+      }).toString();
+      return output;
+    }
+
+
+    // const nodeModulesSrc = path.resolve('node_modules');
+    // const nodeModuleDest = path.join(this.layersPackageDir, 'node_modules');
+
+    // await fsExtra.copy(nodeModulesSrc, nodeModuleDest);
   }
 
   copyProjectFile(filePath, fileName = null) {

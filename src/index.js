@@ -10,6 +10,7 @@ const CloudFormationService = require('./aws/CloudFormationService');
 const ZipService = require('./package/ZipService');
 const LocalFolders = require('./package/LocalFolders');
 const Dependencies = require('./package/Dependencies');
+const { ServerlessLayersConfig } = require('./config/ServerlessLayersConfig');
 
 class ServerlessLayers {
   constructor(serverless, options) {
@@ -17,6 +18,7 @@ class ServerlessLayers {
     this.options = options;
     this.serverless = serverless;
     this.initialized = false;
+    this.slsLayersConfig = new ServerlessLayersConfig(options);
 
     // hooks
     this.hooks = {
@@ -191,29 +193,30 @@ class ServerlessLayers {
   }
 
   async hasCustomHashChanged() {
-    if (!this.settings.customHash) {
-      return false;
-    }
+    // if (!this.settings.customHash) {
+    //   return false;
+    // }
+    //
+    // const hashFileName = 'customHash.json';
+    // const remoteHashFile = await this.bucketService.getFile(hashFileName);
+    //
+    // if (!remoteHashFile) {
+    //   this.log('no previous custom hash found, putting new remote hash');
+    //   await this.bucketService.putFile(
+    //     hashFileName, JSON.stringify({ hash: this.settings.customHash })
+    //   );
+    //   return true;
+    // }
+    //
+    // const { hash: remoteHash } = JSON.parse(remoteHashFile);
+    // if (remoteHash === this.settings.customHash) {
+    //   return false;
+    // }
 
-    const hashFileName = 'customHash.json';
-    const remoteHashFile = await this.bucketService.getFile(hashFileName);
-
-    if (!remoteHashFile) {
-      this.log('no previous custom hash found, putting new remote hash');
-      await this.bucketService.putFile(
-        hashFileName, JSON.stringify({ hash: this.settings.customHash })
-      );
-      return true;
-    }
-
-    const { hash: remoteHash } = JSON.parse(remoteHashFile);
-    if (remoteHash === this.settings.customHash) {
-      return false;
-    }
-
-    await this.bucketService.putFile(
-      hashFileName, JSON.stringify({ hash: this.settings.customHash })
-    );
+    // TODO - bug - put file just after flow succeed
+    // await this.bucketService.putFile(
+    //   hashFileName, JSON.stringify({ hash: this.settings.customHash })
+    // );
     this.log('identified custom hash change!');
     return true;
   }
@@ -299,6 +302,10 @@ class ServerlessLayers {
 
     if (localDir && !artifact) {
       await this.localFolders.copyFolders();
+    }
+
+    if (this.slsLayersConfig.shouldUseLayersArtifactory) {
+
     }
 
     await this.zipService.package();
