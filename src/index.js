@@ -11,6 +11,7 @@ const ZipService = require('./package/ZipService');
 const LocalFolders = require('./package/LocalFolders');
 const Dependencies = require('./package/Dependencies');
 const { ServerlessLayersConfig } = require('./config/ServerlessLayersConfig');
+const { ArtifactoryService } = require('./artifactory/ArtifactoryService');
 
 class ServerlessLayers {
   constructor(serverless, options) {
@@ -124,6 +125,7 @@ class ServerlessLayers {
     this.layersService = new LayersService(this);
     this.bucketService = new BucketService(this);
     this.cloudFormationService = new CloudFormationService(this);
+    this.artifactoryLayerService = new ArtifactoryService(this.slsLayersConfig, this.zipService, this);
     this.initialized = true;
   }
 
@@ -232,7 +234,7 @@ class ServerlessLayers {
 
     // static ARN
     if (arn) {
-      this.relateLayerWithFunctions(arn);
+      this.relateLayerWithFunctions(arn, this.getLayerName());
       return;
     }
 
@@ -291,7 +293,7 @@ class ServerlessLayers {
      */
     if (skipInstallation) {
       this.log(`${chalk.inverse.green(' No changes ')}! Using same layer arn: ${this.logArn(existentLayerArn)}`);
-      this.relateLayerWithFunctions(existentLayerArn);
+      this.relateLayerWithFunctions(existentLayerArn, this.getLayerName());
       return;
     }
 
@@ -304,17 +306,20 @@ class ServerlessLayers {
       await this.localFolders.copyFolders();
     }
 
+    let layerName, layerVersionArn;
     if (this.slsLayersConfig.shouldUseLayersArtifactory) {
-
+      layerVersionArn = await this.artifactoryLayerService.updateLayerFromArtifactory();
+      layerName = this.slsLayersConfig.artifactoryLayerName;
+    } else {
+      await this.zipService.package();
+      await this.bucketService.uploadZipFile();
+      layerVersionArn = await this.layersService.publishVersion().LayerVersionArn;
+      await this.bucketService.putFile(this.dependencies.getDepsPath());
+      await this.bucketService.putFile(this.settings.dependenciesLockPath);
+      layerName = this.getLayerName();
     }
 
-    await this.zipService.package();
-    await this.bucketService.uploadZipFile();
-    const version = await this.layersService.publishVersion();
-    await this.bucketService.putFile(this.dependencies.getDepsPath());
-    await this.bucketService.putFile(this.settings.dependenciesLockPath);
-
-    this.relateLayerWithFunctions(version.LayerVersionArn);
+    this.relateLayerWithFunctions(layerVersionArn, layerName);
   }
 
   getLayerName() {
@@ -375,7 +380,7 @@ class ServerlessLayers {
 
     if (!outputs) return null;
 
-    const logicalId = this.getOutputLogicalId();
+    const logicalId = this.getOutputLogicalId(this.getLayerName());
 
     const arn = (outputs.find(x => x.OutputKey === logicalId) || {}).OutputValue;
 
@@ -385,8 +390,8 @@ class ServerlessLayers {
     return arn;
   }
 
-  getOutputLogicalId() {
-    return this.provider.naming.getLambdaLayerOutputLogicalId(this.getLayerName());
+  getOutputLogicalId(layerName) {
+    return this.provider.naming.getLambdaLayerOutputLogicalId(layerName);
   }
 
   mergePackageOptions() {
@@ -413,7 +418,7 @@ class ServerlessLayers {
     }
   }
 
-  relateLayerWithFunctions(layerArn) {
+  relateLayerWithFunctions(layerArn, layerName) {
     this.log('Adding layers...');
     const { functions } = this.service;
     const funcs = this.settings.functions;
@@ -443,7 +448,7 @@ class ServerlessLayers {
     this.service.resources = this.service.resources || {};
     this.service.resources.Outputs = this.service.resources.Outputs || {};
 
-    const outputName = this.getOutputLogicalId();
+    const outputName = this.getOutputLogicalId(layerName);
 
     Object.assign(this.service.resources.Outputs, {
       [outputName]: {

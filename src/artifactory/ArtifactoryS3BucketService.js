@@ -1,4 +1,5 @@
 import * as AWS from 'aws-sdk';
+
 const fs = require('fs');
 
 class ArtifactoryS3BucketService {
@@ -17,19 +18,19 @@ class ArtifactoryS3BucketService {
         sessionToken: serverlessLayersConfig.s3ArtifactorySessionToken
       }
     });
-
   }
 
   async downloadLayerFile() {
     try {
-      console.debug(`going to download  key ${this.artifactoryHashKey} from bucket ${this.artifactoryBucketName} in region ${this.s3Client.config.region} and endpoint ${this.s3Client.config.endpoint}`);
-      const response = this.s3Client.getObject({
+      const params = {
         Bucket: this.artifactoryBucketName,
         Key: `${this.artifactoryLayerName}/${this.artifactoryHashKey}.json`
-      }).promise();
+      };
 
-      const responseParsed = response.Body?.toString();
-      return responseParsed;
+      console.debug(`going to download  key ${this.artifactoryHashKey} from bucket ${this.artifactoryBucketName} in region ${this.s3Client.config.region} and endpoint ${this.s3Client.config.endpoint}`);
+      const response = await this.s3Client.getObject(params).promise();
+
+      return JSON.parse(response.Body.toString()).layerInfo.layerArn;
     } catch (e) {
       // @ts-ignore
       if (e.code === 'NoSuchKey') {
@@ -42,18 +43,43 @@ class ArtifactoryS3BucketService {
     }
   }
 
-  async uploadLayerZipFile() {
-    console.debug(`going to upload file ${this.artifactoryLayerName}.zip to ${this.artifactoryBucketName}`);
+  async uploadLayerZipFile(zipKey) {
+    console.debug(`going to upload file ${zipKey}.zip to ${zipKey}`);
 
-    const zipFile = await fs.createReadStream((`${zipFileKeyName}.zip`));
-    const response = await this.s3Client.putObject({
-      Bucket: this.bucketName,
-      Key: `${this.artifactoryHashKey}/${this.artifactoryLayerName}/${this.artifactoryLayerName}.zip`,
+    const zipFile = await fs.createReadStream((`${this.artifactoryLayerName}.zip`));
+
+    const params = {
+      Bucket: this.artifactoryBucketName,
+      Key: `${this.artifactoryLayerName}/${zipKey}.zip`,
       Body: zipFile,
       ContentType: 'application/zip'
-    }).promise();
+    };
+    const response = await this.s3Client.putObject(params).promise();
 
-    console.debug(`file ${this.artifactoryLayerName}.zip was uploaded to ${this.artifactoryBucketName}, response is: ${JSON.stringify(response)}`);
+    console.debug(`file ${zipKey}.zip was uploaded to ${this.artifactoryBucketName}, response is: ${JSON.stringify(response)}`);
+  }
+
+  async uploadHashMappingFile(layerArn) {
+    console.debug(`going to upload mapping hash file ${this.artifactoryLayerName}/${this.artifactoryHashKey}.json to bucker ${this.artifactoryBucketName}`);
+    const params = {
+      Bucket: this.artifactoryBucketName,
+      Key: `${this.artifactoryLayerName}/${this.artifactoryHashKey}.json`,
+      Body: this.generateHashMappingFileContent(layerArn),
+      ContentType: 'application/zip'
+    };
+
+    const response = await this.s3Client.putObject(params).promise();
+
+    console.debug(`file ${this.artifactoryLayerName}/${this.artifactoryHashKey}.json was successfully uploaded to ${this.artifactoryBucketName}, response is: ${JSON.stringify(response)}`);
+  }
+
+  generateHashMappingFileContent(layerArn) {
+    return JSON.stringify({
+      layerInfo: {
+        packagesHash: this.artifactoryHashKey,
+        layerArn
+      }
+    });
   }
 }
 
