@@ -103,7 +103,7 @@ class ZipService extends AbstractService {
 
       zip.on('progress', (progress) => {
         console.log('progress');
-        console.log(JSON.stringify(progress));
+        console.log(JSON.stringify(progress)); // TODO - remove!
       });
       zip.finalize()
         .then(() => {

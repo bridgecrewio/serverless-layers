@@ -234,7 +234,7 @@ class ServerlessLayers {
 
     // static ARN
     if (arn) {
-      this.relateLayerWithFunctions(arn, this.getLayerName());
+      this.relateLayerWithFunctions(arn);
       return;
     }
 
@@ -293,7 +293,7 @@ class ServerlessLayers {
      */
     if (skipInstallation) {
       this.log(`${chalk.inverse.green(' No changes ')}! Using same layer arn: ${this.logArn(existentLayerArn)}`);
-      this.relateLayerWithFunctions(existentLayerArn, this.getLayerName());
+      this.relateLayerWithFunctions(existentLayerArn);
       return;
     }
 
@@ -306,20 +306,18 @@ class ServerlessLayers {
       await this.localFolders.copyFolders();
     }
 
-    let layerName, layerVersionArn;
     if (this.slsLayersConfig.shouldUseLayersArtifactory) {
-      layerVersionArn = await this.artifactoryLayerService.updateLayerFromArtifactory();
-      layerName = this.slsLayersConfig.artifactoryLayerName;
+      const layerVersionArn = await this.artifactoryLayerService.updateLayerFromArtifactory();
+      const layerName = this.slsLayersConfig.artifactoryLayerName;
+      this.relateLayerWithFunctions(layerVersionArn, layerName);
     } else {
       await this.zipService.package();
       await this.bucketService.uploadZipFile();
-      layerVersionArn = await this.layersService.publishVersion().LayerVersionArn;
+      const layerVersionArn = await this.layersService.publishVersion().LayerVersionArn;
       await this.bucketService.putFile(this.dependencies.getDepsPath());
       await this.bucketService.putFile(this.settings.dependenciesLockPath);
-      layerName = this.getLayerName();
+      this.relateLayerWithFunctions(layerVersionArn);
     }
-
-    this.relateLayerWithFunctions(layerVersionArn, layerName);
   }
 
   getLayerName() {
@@ -418,7 +416,7 @@ class ServerlessLayers {
     }
   }
 
-  relateLayerWithFunctions(layerArn, layerName) {
+  relateLayerWithFunctions(layerArn, layerName = this.getLayerName()) {
     this.log('Adding layers...');
     const { functions } = this.service;
     const funcs = this.settings.functions;

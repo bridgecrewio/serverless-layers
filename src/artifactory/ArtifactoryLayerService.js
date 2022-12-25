@@ -1,12 +1,8 @@
 import * as AWS from 'aws-sdk';
-const fs = require('fs');
 
-class ArtifactoryLayerService {
+export class ArtifactoryLayerService {
   constructor(serverlessLayersConfig, compatibleRuntimes) {
-    this.artifactoryBucketName = serverlessLayersConfig.artifactoryBucketName;
-    this.artifactoryHashKey = serverlessLayersConfig.artifactoryHashKey;
-    this.artifactoryLayerName = serverlessLayersConfig.artifactoryLayerName;
-    this.artifactoryLayerRegion = serverlessLayersConfig.artifactoryLayerRegion;
+    this.serverlessLayersConfig = serverlessLayersConfig;
 
     this.lambdaLayerClient = new AWS.Lambda({
       region: serverlessLayersConfig.artifactoryRegion,
@@ -20,39 +16,39 @@ class ArtifactoryLayerService {
     });
 
     this.compatibleRuntimes = compatibleRuntimes;
-    this.layerName = serverlessLayersConfig.artifactoryLayerName;
   }
 
-  async publishLayerFromArtifactory(s3FileKey) {
+  async publishLayerFromArtifactory() {
+    console.log(`going to publish new layer version from artifactory, layer zip is in bucket ${this.serverlessLayersConfig.artifactoryBucketName} and zip key is ${this.serverlessLayersConfig.artifactoryZipKey}, layer name is ${this.serverlessLayersConfig.artifactoryLayerName} for the following runtimes ${this.compatibleRuntimes}`);
     const params = {
-      Content: { /* required */
-        S3Bucket: this.artifactoryBucketName,
-        S3Key: s3FileKey,
-        ZipFile: fs.readFileSync(s3FileKey)
+      Content: {
+        S3Bucket: this.serverlessLayersConfig.artifactoryBucketName,
+        S3Key: this.serverlessLayersConfig.artifactoryZipKey
       },
-      LayerName: this.layerName,
-      CompatibleRuntimes: this.compatibleRuntimes,
-      Description: 'created by serverless-layers plugin from artifactory'
+      LayerName: this.serverlessLayersConfig.artifactoryLayerName,
+      Description: 'created by serverless-layers plugin from artifactory',
+      CompatibleRuntimes: this.compatibleRuntimes
     };
-    const response = await this.lambdaLayerClient.publishLayerVersion(params).promise();
-    await this.addLayerVersionPermissionForAwsAccountInTheSameRegion(response.LayerVersionArn, response.Version);
 
+    const response = await this.lambdaLayerClient.publishLayerVersion(params).promise();
     console.log(`new layer version published, response is - ${JSON.stringify(response)}`);
+
+    await this.addLayerVersionPermissionForAwsAccountInTheSameRegion(response.LayerArn, response.Version);
+
     return response.LayerVersionArn;
   }
 
   async addLayerVersionPermissionForAwsAccountInTheSameRegion(layerArn, versionNumber) {
+    console.log(`going to add layer version permissions for layer arn ${layerArn} and version number ${versionNumber} for region ${this.serverlessLayersConfig.artifactoryRegion}`);
     const response = await this.lambdaLayerClient.addLayerVersionPermission({
       LayerName: layerArn,
       VersionNumber: versionNumber,
-      StatementId: `later-version-permission-for-${this.artifactoryLayerRegion}`,
+      StatementId: `layer-version-permission-for-${this.serverlessLayersConfig.artifactoryRegion}`,
       Action: 'lambda:GetLayerVersion',
       Principal: '*',
-      OrganizationId: 'need to fetch from ssm'
+      OrganizationId: this.serverlessLayersConfig.organizationId
     }).promise();
 
-    console.log(`new permission for layer ${layerArn} in ${this.artifactoryLayerRegion}, response is - ${JSON.stringify(response)}`);
+    console.log(`new permission was added for layer ${layerArn} in ${this.serverlessLayersConfig.artifactoryRegion}, response is - ${JSON.stringify(response)}`);
   }
 }
-
-module.exports = ArtifactoryLayerService;

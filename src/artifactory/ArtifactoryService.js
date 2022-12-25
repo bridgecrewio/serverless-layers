@@ -6,22 +6,7 @@ export class ArtifactoryService {
   constructor(serverlessLayersConfig, zipService, plugin) {
     this.artifactoryS3BucketService = new ArtifactoryS3BucketService(serverlessLayersConfig);
     this.artifactoryLayerService = new ArtifactoryLayerService(serverlessLayersConfig, plugin.settings.compatibleRuntimes) //TODO - check if lazy initialization
-    // this.artifactoryBucketName = serverlessLayersConfig.artifactoryBucketName;
-    // this.artifactoryHashKey = serverlessLayersConfig.artifactoryHashKey;
-    this.artifactoryLayerName = serverlessLayersConfig.artifactoryLayerName;
-    this.zipFileKey = `${this.artifactoryLayerName}.zip`;
-    //
-    // this.s3Client = new AWS.S3({
-    //   region: serverlessLayersConfig.artifactoryRegion,
-    //   credentials: {
-    //     // @ts-ignore
-    //     accessKeyId: serverlessLayersConfig.s3ArtifactoryAccessKeyId,
-    //     // @ts-ignore
-    //     secretAccessKey: serverlessLayersConfig.s3ArtifactorySecretAccessKey,
-    //     sessionToken: serverlessLayersConfig.s3ArtifactorySessionToken
-    //   }
-    // });
-
+    this.tempArtifactoryZipFileName = serverlessLayersConfig.tempArtifactoryZipFileName;
     this.zipService = zipService;
   }
 
@@ -34,18 +19,14 @@ export class ArtifactoryService {
     // this.relateLayerWithFunctions(version.LayerVersionArn); ??
     // upload file to artifactory {hash:version}
 
-    let layerVersionArn = this.artifactoryS3BucketService.downloadLayerFile();
+    let layerVersionArn = await this.artifactoryS3BucketService.downloadLayerHashMappingJsonFile();
     if (!layerVersionArn) {
-      await this.zipService.package(this.zipFileKey);
-      await this.artifactoryS3BucketService.uploadLayerZipFile(this.zipFileKey);
-      layerVersionArn = await this.artifactoryLayerService.publishLayerFromArtifactory(this.zipFileKey);
-      await this.artifactoryS3BucketService.uploadHashMappingFile(layerVersionArn);
+      await this.zipService.package(this.tempArtifactoryZipFileName);
+      await this.artifactoryS3BucketService.uploadLayerZipFile();
+      layerVersionArn = await this.artifactoryLayerService.publishLayerFromArtifactory();
+      await this.artifactoryS3BucketService.uploadLayerHashMappingFile(layerVersionArn);
     }
 
     return layerVersionArn;
-
-    // this.relateLayerWithFunctions(version.LayerVersionArn); ??
-    // upload file to artifactory {hash:version}
   }
-
 }
