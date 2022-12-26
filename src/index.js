@@ -307,7 +307,8 @@ class ServerlessLayers {
     } else {
       await this.zipService.package();
       await this.bucketService.uploadZipFile();
-      layerVersionArn = await this.layersService.publishVersion().LayerVersionArn;
+      const version = await this.layersService.publishVersion();
+      layerVersionArn = version.LayerVersionArn;
     }
 
     await this.bucketService.putFile(this.dependencies.getDepsPath());
