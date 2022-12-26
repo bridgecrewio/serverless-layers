@@ -5,13 +5,15 @@ const fs = require('fs');
 export class ArtifactoryS3BucketService {
   constructor(serverlessLayersConfig) {
     this.serverlessLayersConfig = serverlessLayersConfig;
+  }
 
+  initService() {
     this.s3Client = new AWS.S3({
-      region: serverlessLayersConfig.artifactoryRegion,
+      region: this.serverlessLayersConfig.artifactoryRegion,
       credentials: {
-        accessKeyId: serverlessLayersConfig.s3ArtifactoryAccessKeyId,
-        secretAccessKey: serverlessLayersConfig.s3ArtifactorySecretAccessKey,
-        sessionToken: serverlessLayersConfig.s3ArtifactorySessionToken
+        accessKeyId: this.serverlessLayersConfig.s3ArtifactoryAccessKeyId,
+        secretAccessKey: this.serverlessLayersConfig.s3ArtifactorySecretAccessKey,
+        sessionToken: this.serverlessLayersConfig.s3ArtifactorySessionToken
       }
     });
   }

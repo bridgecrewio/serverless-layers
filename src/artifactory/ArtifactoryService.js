@@ -10,8 +10,15 @@ export class ArtifactoryService {
     this.zipService = zipService;
   }
 
+  initServices() {
+    this.artifactoryS3BucketService.initService();
+    this.artifactoryLayerService.initService();
+  }
+
   async updateLayerFromArtifactory() {
     console.log('[ LayersPlugin - Artifacts ]: going to update layer using artifactory');
+    this.initServices();
+
     let layerVersionArn = await this.artifactoryS3BucketService.downloadLayerHashMappingJsonFile();
 
     if (!layerVersionArn) {
