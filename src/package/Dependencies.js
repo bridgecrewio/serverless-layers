@@ -32,7 +32,8 @@ class Dependencies extends AbstractService {
   }
 
   async run(cmd) {
-    if (this.plugin.slsLayersConfig.shouldInstallPackages) {
+    if (!this.plugin.slsLayersConfig.shouldNotInstallPackages) {
+      console.log('[ LayersPlugin ]: installing packages');
       const output = execSync(cmd, {
         cwd: this.layersPackageDir,
         env: process.env,

@@ -1,6 +1,6 @@
 export class ServerlessLayersConfig {
   constructor(options) {
-    this.shouldInstallPackages = !options.shouldInstallPackages || (options.shouldInstallPackages === 'true');
+    this.shouldNotInstallPackages = (options.shouldNotInstallPackages === 'true');
 
     this.shouldUseLayersArtifactory = (options.shouldUseLayersArtifactory === 'true');
     this.artifactoryBucketName = options.artifactoryBucketName;
