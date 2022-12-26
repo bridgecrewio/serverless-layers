@@ -5,22 +5,17 @@ export class ArtifactoryService {
 
   constructor(serverlessLayersConfig, zipService, plugin) {
     this.artifactoryS3BucketService = new ArtifactoryS3BucketService(serverlessLayersConfig);
-    this.artifactoryLayerService = new ArtifactoryLayerService(serverlessLayersConfig, plugin.settings.compatibleRuntimes) //TODO - check if lazy initialization
+    this.artifactoryLayerService = new ArtifactoryLayerService(serverlessLayersConfig, plugin.settings.compatibleRuntimes);
     this.tempArtifactoryZipFileName = serverlessLayersConfig.tempArtifactoryZipFileName;
     this.zipService = zipService;
   }
 
   async updateLayerFromArtifactory() {
-    // check if hash - key exists in bucket - if so - download json file, check the version and arn and update lambda layer
-    // if not exists - do all the package stuff and upload
-    // await this.zipService.package();
-    // await this.bucketService.uploadZipFile();
-    // const version = await this.layersService.publishVersion();
-    // this.relateLayerWithFunctions(version.LayerVersionArn); ??
-    // upload file to artifactory {hash:version}
-
+    console.log('[ LayersPlugin - Artifacts ]: going to update layer using artifactory');
     let layerVersionArn = await this.artifactoryS3BucketService.downloadLayerHashMappingJsonFile();
+
     if (!layerVersionArn) {
+      console.log('[ LayersPlugin - Artifacts ]: hash does not exist in the artifactory, going to add new layer');
       await this.zipService.package(this.tempArtifactoryZipFileName);
       await this.artifactoryS3BucketService.uploadLayerZipFile();
       layerVersionArn = await this.artifactoryLayerService.publishLayerFromArtifactory();

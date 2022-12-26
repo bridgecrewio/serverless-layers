@@ -46,14 +46,14 @@ describe('Runtime', () => {
         runtimes.init();
       });
 
-      // it('checks if version is compatible', () => {
-      //   return runtimes._runtime.isCompatibleVersion('v12.16').then((res) => {
-      //     expect(res.isCompatible).to.equal(true);
-      //   })
-      //     .then(() => runtimes._runtime.isCompatibleVersion('v12.18.3').then((res) => {
-      //       expect(res.isCompatible).to.equal(true);
-      //     }));
-      // });
+      it('checks if version is compatible', () => {
+        return runtimes._runtime.isCompatibleVersion('v12.16').then((res) => {
+          expect(res.isCompatible).to.equal(true);
+        })
+          .then(() => runtimes._runtime.isCompatibleVersion('v12.18.3').then((res) => {
+            expect(res.isCompatible).to.equal(true);
+          }));
+      });
 
       it('compares two package json and returns if different', () => {
         return runtimes._runtime.hasDependenciesChanges().then((hasChanged) => {

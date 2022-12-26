@@ -53,7 +53,6 @@ class ZipService extends AbstractService {
 
   package(zipFileName = this.plugin.getPathZipFileName()) {
     const { compileDir, artifact, libraryFolder, runtimeDir } = this.plugin.settings;
-    // const zipFileName = this.plugin.getPathZipFileName();
     const layersDir = path.join(process.cwd(), compileDir);
     const shouldZipExternalLibraries = !this.plugin.slsLayersConfig.shouldInstallPackages;
     const externalLibrariesFolder = path.join(process.cwd(), libraryFolder);
@@ -97,14 +96,11 @@ class ZipService extends AbstractService {
       zip.pipe(output);
 
       zip.directory('layers', false);
+
       if (shouldZipExternalLibraries) {
         zip.directory(externalLibrariesFolder, path.join(runtimeDir, libraryFolder));
       }
 
-      zip.on('progress', (progress) => {
-        console.log('progress');
-        console.log(JSON.stringify(progress)); // TODO - remove!
-      });
       zip.finalize()
         .then(() => {
           process.chdir(oldCwd);

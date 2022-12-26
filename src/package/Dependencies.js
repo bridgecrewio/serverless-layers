@@ -40,12 +40,6 @@ class Dependencies extends AbstractService {
       }).toString();
       return output;
     }
-
-
-    // const nodeModulesSrc = path.resolve('node_modules');
-    // const nodeModuleDest = path.join(this.layersPackageDir, 'node_modules');
-
-    // await fsExtra.copy(nodeModulesSrc, nodeModuleDest);
   }
 
   copyProjectFile(filePath, fileName = null) {

@@ -125,6 +125,7 @@ class ServerlessLayers {
     this.layersService = new LayersService(this);
     this.bucketService = new BucketService(this);
     this.cloudFormationService = new CloudFormationService(this);
+    this.slsLayersConfig.init(this);
     this.artifactoryLayerService = new ArtifactoryService(this.slsLayersConfig, this.zipService, this);
     this.initialized = true;
   }
@@ -194,31 +195,21 @@ class ServerlessLayers {
     });
   }
 
-  async hasCustomHashChanged() {
-    // if (!this.settings.customHash) {
-    //   return false;
-    // }
-    //
-    // const hashFileName = 'customHash.json';
-    // const remoteHashFile = await this.bucketService.getFile(hashFileName);
-    //
-    // if (!remoteHashFile) {
-    //   this.log('no previous custom hash found, putting new remote hash');
-    //   await this.bucketService.putFile(
-    //     hashFileName, JSON.stringify({ hash: this.settings.customHash })
-    //   );
-    //   return true;
-    // }
-    //
-    // const { hash: remoteHash } = JSON.parse(remoteHashFile);
-    // if (remoteHash === this.settings.customHash) {
-    //   return false;
-    // }
+  async hasCustomHashChanged(hashFileName) {
+    if (!this.settings.customHash) {
+      return false;
+    }
+    const remoteHashFile = await this.bucketService.getFile(hashFileName);
 
-    // TODO - bug - put file just after flow succeed
-    // await this.bucketService.putFile(
-    //   hashFileName, JSON.stringify({ hash: this.settings.customHash })
-    // );
+    if (!remoteHashFile) {
+      this.log('no previous custom hash found, putting new remote hash');
+      return true;
+    }
+
+    const { hash: remoteHash } = JSON.parse(remoteHashFile);
+    if (remoteHash === this.settings.customHash) {
+      return false;
+    }
     this.log('identified custom hash change!');
     return true;
   }
@@ -265,7 +256,8 @@ class ServerlessLayers {
       hasZipChanged = await this.zipService.hasZipChanged();
     }
 
-    const hashCustomHashChanged = await this.hasCustomHashChanged();
+    const hashFileName = 'customHash.json';
+    const hashCustomHashChanged = await this.hasCustomHashChanged(hashFileName);
 
     // It checks if something has changed
     const verifyChanges = [
@@ -306,22 +298,32 @@ class ServerlessLayers {
       await this.localFolders.copyFolders();
     }
 
+    let layerVersionArn = '';
+    let layerName = this.getLayerName();
+
     if (this.slsLayersConfig.shouldUseLayersArtifactory) {
-      const layerVersionArn = await this.artifactoryLayerService.updateLayerFromArtifactory();
-      const layerName = this.slsLayersConfig.artifactoryLayerName;
-      this.relateLayerWithFunctions(layerVersionArn, layerName);
+      layerVersionArn = await this.artifactoryLayerService.updateLayerFromArtifactory();
+      layerName = this.slsLayersConfig.artifactoryLayerName;
     } else {
       await this.zipService.package();
       await this.bucketService.uploadZipFile();
-      const layerVersionArn = await this.layersService.publishVersion().LayerVersionArn;
-      await this.bucketService.putFile(this.dependencies.getDepsPath());
-      await this.bucketService.putFile(this.settings.dependenciesLockPath);
-      this.relateLayerWithFunctions(layerVersionArn);
+      layerVersionArn = await this.layersService.publishVersion().LayerVersionArn;
     }
+
+    await this.bucketService.putFile(this.dependencies.getDepsPath());
+    await this.bucketService.putFile(this.settings.dependenciesLockPath);
+    if (hashCustomHashChanged) {
+      await this.bucketService.putFile(
+        hashFileName, JSON.stringify({ hash: this.settings.customHash })
+      );
+    }
+
+    console.log(`[ LayersPlugin - Artifacts ]: going to relate layer, layer arn - ${layerVersionArn}, layer name - ${layerName}`);
+
+    this.relateLayerWithFunctions(layerVersionArn, layerName);
   }
 
-  getLayerName() {
-    const stackName = this.getStackName();
+  getLayerName(stackName = this.getStackName()) {
     const { runtimeDir } = this.settings;
     return slugify(`${stackName}-${runtimeDir}-${this.currentLayerName}`, {
       lower: true,
