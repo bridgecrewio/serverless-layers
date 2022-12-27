@@ -5,6 +5,7 @@ const fs = require('fs');
 export class ArtifactoryS3BucketService {
   constructor(serverlessLayersConfig) {
     this.serverlessLayersConfig = serverlessLayersConfig;
+    this.s3Client = {};
   }
 
   initService() {
