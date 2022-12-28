@@ -195,14 +195,19 @@ class ServerlessLayers {
     });
   }
 
-  async hasCustomHashChanged(hashFileName) {
+  async hasCustomHashChanged() {
     if (!this.settings.customHash) {
       return false;
     }
+
+    const hashFileName = 'customHash.json';
     const remoteHashFile = await this.bucketService.getFile(hashFileName);
 
     if (!remoteHashFile) {
       this.log('no previous custom hash found, putting new remote hash');
+      await this.bucketService.putFile(
+        hashFileName, JSON.stringify({ hash: this.settings.customHash })
+      );
       return true;
     }
 
@@ -210,6 +215,10 @@ class ServerlessLayers {
     if (remoteHash === this.settings.customHash) {
       return false;
     }
+
+    await this.bucketService.putFile(
+      hashFileName, JSON.stringify({ hash: this.settings.customHash })
+    );
     this.log('identified custom hash change!');
     return true;
   }
@@ -256,8 +265,7 @@ class ServerlessLayers {
       hasZipChanged = await this.zipService.hasZipChanged();
     }
 
-    const hashFileName = 'customHash.json';
-    const hashCustomHashChanged = await this.hasCustomHashChanged(hashFileName);
+    const hashCustomHashChanged = await this.hasCustomHashChanged();
 
     // It checks if something has changed
     const verifyChanges = [
@@ -313,11 +321,6 @@ class ServerlessLayers {
 
     await this.bucketService.putFile(this.dependencies.getDepsPath());
     await this.bucketService.putFile(this.settings.dependenciesLockPath);
-    if (hashCustomHashChanged) {
-      await this.bucketService.putFile(
-        hashFileName, JSON.stringify({ hash: this.settings.customHash })
-      );
-    }
 
     this.relateLayerWithFunctions(layerVersionArn, layerName);
   }
