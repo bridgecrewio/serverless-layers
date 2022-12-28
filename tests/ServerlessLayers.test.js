@@ -131,38 +131,5 @@ describe('ServerlessLayers Tests', () => {
 
       sinon.assert.calledWith(relateLayerWithFunctionsSpy, 'test-version-arn-artifactory', 'artifactory-layer');
     });
-
-    it('when custom hash change - expect updating file', async () => {
-      plugin = new ServerlessLayers({}, {
-        shouldUseLayersArtifactory: 'true'
-      });
-
-      plugin.slsLayersConfig.artifactoryLayerName = 'artifactory-layer';
-
-      stubPlugin(true);
-
-      const zipPackageSpy = sinon.spy(plugin.zipService, 'package');
-      const bucketServiceUploadZipFileSpy = sinon.spy(plugin.bucketService, 'uploadZipFile');
-      const layersServicePublishVersionSpy = sinon.spy(plugin.layersService, 'publishVersion');
-      const bucketServicePutFileSpy = sinon.spy(plugin.bucketService, 'putFile');
-      const relateLayerWithFunctionsSpy = sinon.stub(plugin, 'relateLayerWithFunctions').callsFake(() => {});
-      const artifactoryLayerServiceSpy = sinon.spy(plugin.artifactoryLayerService, 'updateLayerFromArtifactory');
-
-      await plugin.main();
-
-      sinon.assert.notCalled(zipPackageSpy);
-      sinon.assert.notCalled(bucketServiceUploadZipFileSpy);
-      sinon.assert.notCalled(layersServicePublishVersionSpy);
-
-      sinon.assert.calledWith(bucketServicePutFileSpy, 'test-path');
-      sinon.assert.calledWith(bucketServicePutFileSpy, 'package-lock.json');
-
-      sinon.assert.calledOnce(artifactoryLayerServiceSpy);
-
-      sinon.assert.calledWith(bucketServicePutFileSpy, 'customHash.json', '{"hash":"cutsomHash"}');
-
-      sinon.assert.calledWith(relateLayerWithFunctionsSpy, 'test-version-arn-artifactory', 'artifactory-layer');
-    });
-
   });
 });
