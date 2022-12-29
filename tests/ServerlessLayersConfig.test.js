@@ -33,7 +33,7 @@ describe('ServerlessLayersConfig Tests', () => {
       artifactoryLayerName: 'artifactory-layer-test',
       artifactoryHashKey: 'hash-key-test',
       organizationId: 'organization-id-test',
-      uniqueTag: 'test',
+      tag: 'test',
       artifactoryStr: 'artifactory-test'
     });
 
@@ -71,7 +71,7 @@ describe('ServerlessLayersConfig Tests', () => {
     const serverlessLayerConfig = new ServerlessLayersConfig({
       artifactoryLayerName: 'artifactory-layer-test',
       artifactoryHashKey: 'hash-key-test',
-      uniqueTag: 'unique-tag'
+      tag: 'unique-tag'
     });
     const plugin = new ServerlessLayers({}, {});
     plugin.settings = {
@@ -95,7 +95,7 @@ describe('ServerlessLayersConfig Tests', () => {
     const serverlessLayerConfig = new ServerlessLayersConfig({
       artifactoryLayerName: 'artifactory-layer-test',
       artifactoryHashKey: 'hash-key-test',
-      uniqueTag: 'some-tag'
+      tag: 'some-tag'
     });
     const plugin = new ServerlessLayers({}, {});
     plugin.settings = {

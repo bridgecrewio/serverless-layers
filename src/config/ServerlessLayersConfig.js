@@ -13,7 +13,7 @@ export class ServerlessLayersConfig {
     this.artifactoryHashKey = options.artifactoryHashKey;
 
     this.organizationId = options.organizationId;
-    this.uniqueTag = options.uniqueTag;
+    this.uniqueTag = options.tag;
     this.artifactoryStr = options.artifactoryStr ? options.artifactoryStr : 'artifactory';
   }
 
