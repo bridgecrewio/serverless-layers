@@ -325,7 +325,8 @@ class ServerlessLayers {
     this.relateLayerWithFunctions(layerVersionArn, layerName);
   }
 
-  getLayerName(stackName = this.getStackName()) {
+  getLayerName() {
+    const stackName = this.getStackName();
     console.log(`[ LayersPlugin ]: going to generate layer name, stackName is - ${stackName}`);
     const { runtimeDir } = this.settings;
     return slugify(`${stackName}-${runtimeDir}-${this.currentLayerName}`, {

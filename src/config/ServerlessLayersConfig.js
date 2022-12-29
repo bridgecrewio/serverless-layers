@@ -10,16 +10,19 @@ export class ServerlessLayersConfig {
     this.s3ArtifactorySecretAccessKey = process.env.SLS_CODE_ARTIFACTS_AWS_SECRET_ACCESS_KEY;
     this.s3ArtifactorySessionToken = process.env.SLS_CODE_ARTIFACTS_AWS_SESSION_TOKEN;
 
-    this.artifactoryLayerNamePrefix = options.artifactoryLayerName;
     this.artifactoryHashKey = options.artifactoryHashKey;
 
     this.organizationId = options.organizationId;
+    this.uniqueTag = options.uniqueTag;
+    this.artifactoryStr = options.artifactoryStr ? options.artifactoryStr : 'artifactory';
   }
 
   init(plugin) {
-    this.artifactoryLayerName = plugin.getLayerName(this.artifactoryLayerNamePrefix);
+    const pluginLayerName = plugin.getLayerName();
+    this.artifactoryLayerName = pluginLayerName.includes(this.uniqueTag) ? pluginLayerName.replace(this.uniqueTag, this.artifactoryStr) : `${pluginLayerName}-${this.artifactoryStr}`;
     this.artifactoryJsonMappingKey = `${this.artifactoryLayerName}/${this.artifactoryHashKey}.json`;
     this.artifactoryZipKey = `${this.artifactoryLayerName}/${this.artifactoryLayerName}.zip`;
     this.tempArtifactoryZipFileName = `${this.artifactoryLayerName}.zip`;
   }
+
 }
