@@ -41,7 +41,8 @@ describe('Runtime', () => {
 
         plugin.settings = runtimes.getDefaultSettings({
           packageManager: 'yarn',
-          dependenciesPath: './tests/fixtures/package.json'
+          dependenciesPath: './tests/fixtures/package.json',
+          dependenciesLockPath: './tests/fixtures/package-lock.json'
         })
         runtimes.init()
         runtimes._runtime.parent.run = () => 'v12.20.1';
