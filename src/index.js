@@ -491,7 +491,7 @@ class ServerlessLayers {
           return;
         }
 
-        let isEnabled = !funcs;
+      let isEnabled = !funcs;
 
         if (Array.isArray(funcs) && funcs.indexOf(funcName) !== -1) {
           isEnabled = true;
