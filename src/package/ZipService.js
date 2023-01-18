@@ -98,7 +98,7 @@ class ZipService extends AbstractService {
       zip.directory('layers', false);
 
       if (shouldZipExternalLibraries) {
-        console.log(`[ LayersPlugin ]: external libraries should be zipped, externalLibrariesFolder - ${externalLibrariesFolder}, runtimeDir - ${runtimeDir}, ${libraryFolder}`);
+        console.log(`[ LayersPlugin-test ]: external libraries should be zipped, externalLibrariesFolder - ${externalLibrariesFolder}, runtimeDir - ${runtimeDir}, ${libraryFolder}`);
         zip.directory(externalLibrariesFolder, path.join(runtimeDir, libraryFolder));
       }
 
