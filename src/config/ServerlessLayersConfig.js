@@ -1,4 +1,4 @@
-export class ServerlessLayersConfig {
+class ServerlessLayersConfig {
   constructor(options) {
     this.shouldNotInstallPackages = (options.shouldNotInstallPackages === 'true');
 
@@ -26,3 +26,5 @@ export class ServerlessLayersConfig {
   }
 
 }
+
+module.exports = { ServerlessLayersConfig };

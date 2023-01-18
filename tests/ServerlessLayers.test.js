@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
 
-const ServerlessLayers = require('../lib/index');
+const ServerlessLayers = require('../src/index');
 
 describe('ServerlessLayers Tests', () => {
   describe('test main() function when deployLayers()', () => {

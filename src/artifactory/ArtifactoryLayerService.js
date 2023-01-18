@@ -1,6 +1,6 @@
-import * as AWS from 'aws-sdk';
+const AWS = require('aws-sdk');
 
-export class ArtifactoryLayerService {
+class ArtifactoryLayerService {
   constructor(serverlessLayersConfig, compatibleRuntimes) {
     this.serverlessLayersConfig = serverlessLayersConfig;
     this.compatibleRuntimes = compatibleRuntimes;
@@ -53,3 +53,5 @@ export class ArtifactoryLayerService {
     console.log(`[ LayersPlugin - Artifacts ]: new permission was added for layer ${layerArn} in ${this.serverlessLayersConfig.artifactoryRegion}, response is - ${JSON.stringify(response)}`);
   }
 }
+
+module.exports = { ArtifactoryLayerService };

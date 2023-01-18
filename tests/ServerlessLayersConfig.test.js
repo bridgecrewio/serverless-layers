@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 
-const { ServerlessLayersConfig } = require('../lib/config/ServerlessLayersConfig');
-const ServerlessLayers = require('../lib/index');
+const { ServerlessLayersConfig } = require('../src/config/ServerlessLayersConfig');
+const ServerlessLayers = require('../src/index');
 
 describe('ServerlessLayersConfig Tests', () => {
   it('when options do not include any config', () => {

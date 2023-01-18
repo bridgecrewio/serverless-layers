@@ -1,7 +1,7 @@
 const { ArtifactoryS3BucketService } = require('./ArtifactoryS3BucketService');
 const { ArtifactoryLayerService } = require('./ArtifactoryLayerService');
 
-export class ArtifactoryService {
+class ArtifactoryService {
 
   constructor(serverlessLayersConfig, zipService, plugin) {
     this.artifactoryS3BucketService = new ArtifactoryS3BucketService(serverlessLayersConfig);
@@ -32,3 +32,5 @@ export class ArtifactoryService {
     return layerVersionArn;
   }
 }
+
+module.exports = { ArtifactoryService };
