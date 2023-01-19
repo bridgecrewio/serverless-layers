@@ -32,15 +32,13 @@ class Dependencies extends AbstractService {
   }
 
   async run(cmd) {
-    if (!this.plugin.slsLayersConfig.shouldNotInstallPackages) {
-      console.log('[ LayersPlugin-test ]: installing packages');
-      const output = execSync(cmd, {
-        cwd: this.layersPackageDir,
-        env: process.env,
-        maxBuffer: 1024 * 1024 * 500
-      }).toString();
-      return output;
-    }
+    console.log('[ LayersPlugin-test ]: installing packages');
+    const output = execSync(cmd, {
+      cwd: this.layersPackageDir,
+      env: process.env,
+      maxBuffer: 1024 * 1024 * 500
+    }).toString();
+    return output;
   }
 
   copyProjectFile(filePath, fileName = null) {

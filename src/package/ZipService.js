@@ -52,10 +52,8 @@ class ZipService extends AbstractService {
   }
 
   package(zipFileName = this.plugin.getPathZipFileName()) {
-    const { compileDir, artifact, libraryFolder, runtimeDir } = this.plugin.settings;
+    const { compileDir, artifact } = this.plugin.settings;
     const layersDir = path.join(process.cwd(), compileDir);
-    const shouldZipExternalLibraries = this.plugin.slsLayersConfig.shouldNotInstallPackages;
-    const externalLibrariesFolder = path.join(process.cwd(), libraryFolder);
 
     return new Promise((resolve, reject) => {
       // it's a zip already
@@ -96,11 +94,6 @@ class ZipService extends AbstractService {
       zip.pipe(output);
 
       zip.directory('layers', false);
-
-      if (shouldZipExternalLibraries) {
-        console.log(`[ LayersPlugin-test ]: external libraries should be zipped, externalLibrariesFolder - ${externalLibrariesFolder}, runtimeDir - ${runtimeDir}, ${libraryFolder}`);
-        zip.directory(externalLibrariesFolder, path.join(runtimeDir, libraryFolder));
-      }
 
       zip.finalize()
         .then(() => {

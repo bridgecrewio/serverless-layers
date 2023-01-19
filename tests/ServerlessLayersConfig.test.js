@@ -6,7 +6,6 @@ const ServerlessLayers = require('../src/index');
 describe('ServerlessLayersConfig Tests', () => {
   it('when options do not include any config', () => {
     const serverlessLayerConfig = new ServerlessLayersConfig({});
-    expect(serverlessLayerConfig.shouldNotInstallPackages).to.false;
     expect(serverlessLayerConfig.shouldUseLayersArtifactory).to.false;
     expect(serverlessLayerConfig.artifactoryRegion).undefined;
     expect(serverlessLayerConfig.s3ArtifactoryAccessKeyId).undefined;
@@ -27,7 +26,6 @@ describe('ServerlessLayersConfig Tests', () => {
     process.env.SLS_CODE_ARTIFACTS_AWS_SECRET_ACCESS_KEY = 'test_secret_key';
     process.env.SLS_CODE_ARTIFACTS_AWS_SESSION_TOKEN = 'test_session_token';
     const serverlessLayerConfig = new ServerlessLayersConfig({
-      shouldNotInstallPackages: 'false',
       shouldUseLayersArtifactory: 'false',
       artifactoryRegion: 'us-west-2',
       artifactoryLayerName: 'artifactory-layer-test',
@@ -37,7 +35,6 @@ describe('ServerlessLayersConfig Tests', () => {
       artifactoryStr: 'artifactory-test'
     });
 
-    expect(serverlessLayerConfig.shouldNotInstallPackages).to.false;
     expect(serverlessLayerConfig.shouldUseLayersArtifactory).to.false;
     expect(serverlessLayerConfig.artifactoryRegion).equals('us-west-2');
     expect(serverlessLayerConfig.s3ArtifactoryAccessKeyId).equals('test_access_key');
@@ -55,16 +52,6 @@ describe('ServerlessLayersConfig Tests', () => {
     process.env.SLS_CODE_ARTIFACTS_AWS_ACCESS_KEY_ID = undefined;
     process.env.SLS_CODE_ARTIFACTS_AWS_SECRET_ACCESS_KEY = undefined;
     process.env.SLS_CODE_ARTIFACTS_AWS_SESSION_TOKEN = undefined;
-  });
-
-  it('when shouldNotInstallPackages and shouldUseLayersArtifactory should be true', () => {
-    const serverlessLayerConfig = new ServerlessLayersConfig({
-      shouldNotInstallPackages: 'true',
-      shouldUseLayersArtifactory: 'true',
-    });
-
-    expect(serverlessLayerConfig.shouldNotInstallPackages).to.true;
-    expect(serverlessLayerConfig.shouldUseLayersArtifactory).to.true;
   });
 
   it('test init function for file names fields when stack name contains unique tag', () => {
