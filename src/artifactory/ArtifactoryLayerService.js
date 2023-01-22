@@ -18,7 +18,7 @@ class ArtifactoryLayerService {
   }
 
   async publishLayerFromArtifactory() {
-    console.log(`[ LayersPlugin-test - Artifacts ]: going to publish new layer version from artifactory, layer zip is in bucket ${this.serverlessLayersConfig.artifactoryBucketName} and zip key is ${this.serverlessLayersConfig.artifactoryZipKey}, layer name is ${this.serverlessLayersConfig.artifactoryLayerName} for the following runtimes ${this.compatibleRuntimes}`);
+    console.log(`[ LayersPlugin - Artifacts ]: going to publish new layer version from artifactory, layer zip is in bucket ${this.serverlessLayersConfig.artifactoryBucketName} and zip key is ${this.serverlessLayersConfig.artifactoryZipKey}, layer name is ${this.serverlessLayersConfig.artifactoryLayerName} for the following runtimes ${this.compatibleRuntimes}`);
 
     const params = {
       Content: {
@@ -31,7 +31,7 @@ class ArtifactoryLayerService {
     };
 
     const response = await this.lambdaLayerClient.publishLayerVersion(params).promise();
-    console.log(`[ LayersPlugin-test - Artifacts ]: new layer version published, response is - ${JSON.stringify(response)}`);
+    console.log(`[ LayersPlugin - Artifacts ]: new layer version published, response is - ${JSON.stringify(response)}`);
 
     await this.addLayerVersionPermissionForAwsAccountInTheSameRegion(response.LayerArn, response.Version);
 
@@ -39,7 +39,7 @@ class ArtifactoryLayerService {
   }
 
   async addLayerVersionPermissionForAwsAccountInTheSameRegion(layerArn, versionNumber) {
-    console.log(`[ LayersPlugin-test - Artifacts ]: going to add layer version permissions for layer arn ${layerArn} and version number ${versionNumber} for region ${this.serverlessLayersConfig.artifactoryRegion}`);
+    console.log(`[ LayersPlugin - Artifacts ]: going to add layer version permissions for layer arn ${layerArn} and version number ${versionNumber} for region ${this.serverlessLayersConfig.artifactoryRegion}`);
 
     const response = await this.lambdaLayerClient.addLayerVersionPermission({
       LayerName: layerArn,
@@ -50,7 +50,7 @@ class ArtifactoryLayerService {
       OrganizationId: this.serverlessLayersConfig.organizationId
     }).promise();
 
-    console.log(`[ LayersPlugin-test - Artifacts ]: new permission was added for layer ${layerArn} in ${this.serverlessLayersConfig.artifactoryRegion}, response is - ${JSON.stringify(response)}`);
+    console.log(`[ LayersPlugin - Artifacts ]: new permission was added for layer ${layerArn} in ${this.serverlessLayersConfig.artifactoryRegion}, response is - ${JSON.stringify(response)}`);
   }
 }
 

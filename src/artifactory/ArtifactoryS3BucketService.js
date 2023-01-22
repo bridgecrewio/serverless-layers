@@ -20,7 +20,7 @@ class ArtifactoryS3BucketService {
   }
 
   async downloadLayerHashMappingJsonFile() {
-    console.debug(`[ LayersPlugin-test - Artifacts ]: going to download hash mapping file - key ${this.serverlessLayersConfig.artifactoryJsonMappingKey} from bucket ${this.serverlessLayersConfig.artifactoryBucketName} in region ${this.s3Client.config.region} and endpoint ${this.s3Client.config.endpoint}`);
+    console.debug(`[ LayersPlugin - Artifacts ]: going to download hash mapping file - key ${this.serverlessLayersConfig.artifactoryJsonMappingKey} from bucket ${this.serverlessLayersConfig.artifactoryBucketName} in region ${this.s3Client.config.region} and endpoint ${this.s3Client.config.endpoint}`);
 
     try {
       const params = {
@@ -33,17 +33,17 @@ class ArtifactoryS3BucketService {
       return JSON.parse(response.Body.toString()).layerInfo.layerArn;
     } catch (e) {
       if (e.code === 'NoSuchKey') {
-        console.debug(`[ LayersPlugin-test - Artifacts ]: key ${this.serverlessLayersConfig.artifactoryJsonMappingKey} was not found in bucket ${this.serverlessLayersConfig.artifactoryBucketName}`);
+        console.debug(`[ LayersPlugin - Artifacts ]: key ${this.serverlessLayersConfig.artifactoryJsonMappingKey} was not found in bucket ${this.serverlessLayersConfig.artifactoryBucketName}`);
         return undefined;
       }
 
-      console.error(`[ LayersPlugin-test - Artifacts ]: could not query bucket ${this.serverlessLayersConfig.artifactoryBucketName} for key ${this.serverlessLayersConfig.artifactoryJsonMappingKey}`, e);
+      console.error(`[ LayersPlugin - Artifacts ]: could not query bucket ${this.serverlessLayersConfig.artifactoryBucketName} for key ${this.serverlessLayersConfig.artifactoryJsonMappingKey}`, e);
       throw e;
     }
   }
 
   async uploadLayerHashMappingFile(layerArn) {
-    console.debug(`[ LayersPlugin-test - Artifacts ]: going to upload hash mapping file - key ${this.serverlessLayersConfig.artifactoryJsonMappingKey} for bucket ${this.serverlessLayersConfig.artifactoryBucketName}`);
+    console.debug(`[ LayersPlugin - Artifacts ]: going to upload hash mapping file - key ${this.serverlessLayersConfig.artifactoryJsonMappingKey} for bucket ${this.serverlessLayersConfig.artifactoryBucketName}`);
 
     const params = {
       Bucket: this.serverlessLayersConfig.artifactoryBucketName,
@@ -54,7 +54,7 @@ class ArtifactoryS3BucketService {
 
     const response = await this.s3Client.putObject(params).promise();
 
-    console.debug(`[ LayersPlugin-test - Artifacts ]: file ${this.serverlessLayersConfig.artifactoryJsonMappingKey} was successfully uploaded to ${this.serverlessLayersConfig.artifactoryBucketName}, response is: ${JSON.stringify(response)}`);
+    console.debug(`[ LayersPlugin - Artifacts ]: file ${this.serverlessLayersConfig.artifactoryJsonMappingKey} was successfully uploaded to ${this.serverlessLayersConfig.artifactoryBucketName}, response is: ${JSON.stringify(response)}`);
   }
 
   generateHashMappingFileContent(layerArn) {
@@ -67,7 +67,7 @@ class ArtifactoryS3BucketService {
   }
 
   async uploadLayerZipFile() {
-    console.debug(`[ LayersPlugin-test - Artifacts ]: going to upload file ${this.serverlessLayersConfig.tempArtifactoryZipFileName} to ${this.serverlessLayersConfig.artifactoryBucketName} bucket for key ${this.serverlessLayersConfig.artifactoryZipKey}`);
+    console.debug(`[ LayersPlugin - Artifacts ]: going to upload file ${this.serverlessLayersConfig.tempArtifactoryZipFileName} to ${this.serverlessLayersConfig.artifactoryBucketName} bucket for key ${this.serverlessLayersConfig.artifactoryZipKey}`);
 
     const zipFile = await fs.createReadStream((this.serverlessLayersConfig.tempArtifactoryZipFileName));
 
@@ -79,7 +79,7 @@ class ArtifactoryS3BucketService {
     };
     const response = await this.s3Client.putObject(params).promise();
 
-    console.debug(`[ LayersPlugin-test - Artifacts ]: file ${this.serverlessLayersConfig.artifactoryZipKey} was uploaded to ${this.serverlessLayersConfig.artifactoryBucketName}, response is: ${JSON.stringify(response)}`);
+    console.debug(`[ LayersPlugin - Artifacts ]: file ${this.serverlessLayersConfig.artifactoryZipKey} was uploaded to ${this.serverlessLayersConfig.artifactoryBucketName}, response is: ${JSON.stringify(response)}`);
   }
 }
 

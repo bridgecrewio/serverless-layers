@@ -32,7 +32,7 @@ class Dependencies extends AbstractService {
   }
 
   async run(cmd) {
-    console.log('[ LayersPlugin-test ]: installing packages');
+    console.log('[ LayersPlugin ]: installing packages');
     const output = execSync(cmd, {
       cwd: this.layersPackageDir,
       env: process.env,

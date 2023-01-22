@@ -363,7 +363,7 @@ class ServerlessLayers {
 
   getLayerName() {
     const stackName = this.getStackName();
-    console.log(`[ LayersPlugin-test ]: going to generate layer name, stackName is - ${stackName}`);
+    console.log(`[ LayersPlugin ]: going to generate layer name, stackName is - ${stackName}`);
     const { runtimeDir } = this.settings;
     return slugify(`${stackName}-${runtimeDir}-${this.currentLayerName}`, {
       lower: true,
@@ -463,7 +463,7 @@ class ServerlessLayers {
   }
 
   relateLayerWithFunctions(layerArn, layerName = this.getLayerName()) {
-    console.log(`[ LayersPlugin-test ]: going to relate layer with functions, layer arn: - ${layerArn}, layer name - ${layerName}`);
+    console.log(`[ LayersPlugin ]: going to relate layer with functions, layer arn: - ${layerArn}, layer name - ${layerName}`);
     this.log('Adding layers...');
     const { functions } = this.service;
     const funcs = this.settings.functions;
@@ -559,7 +559,7 @@ class ServerlessLayers {
 
   logGroup(msg) {
     this.breakLine();
-    this.serverless.cli.log(`[ LayersPlugin-test ]: ${chalk.magenta.bold('=>')} ${chalk.greenBright.bold(msg)}`);
+    this.serverless.cli.log(`[ LayersPlugin ]: ${chalk.magenta.bold('=>')} ${chalk.greenBright.bold(msg)}`);
   }
 
   warn(msg, signal = ' ∅') {

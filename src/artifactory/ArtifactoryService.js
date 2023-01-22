@@ -16,13 +16,13 @@ class ArtifactoryService {
   }
 
   async updateLayerFromArtifactory() {
-    console.log('[ LayersPlugin-test - Artifacts ]: going to update layer using artifactory');
+    console.log('[ LayersPlugin - Artifacts ]: going to update layer using artifactory');
     this.initServices();
 
     let layerVersionArn = await this.artifactoryS3BucketService.downloadLayerHashMappingJsonFile();
 
     if (!layerVersionArn) {
-      console.log('[ LayersPlugin-test - Artifacts ]: hash does not exist in the artifactory, going to add new layer');
+      console.log('[ LayersPlugin - Artifacts ]: hash does not exist in the artifactory, going to add new layer');
       await this.zipService.package(this.tempArtifactoryZipFileName);
       await this.artifactoryS3BucketService.uploadLayerZipFile();
       layerVersionArn = await this.artifactoryLayerService.publishLayerFromArtifactory();
