@@ -1,8 +1,8 @@
 {
   "name": "serverless-layers",
-  "version": "2.4.0",
+  "version": "2.6.1",
   "description": "",
-  "main": "lib/index.js",
+  "main": "src/index.js",
   "bugs": {
     "url": "https://github.com/agutoli/serverless-layers/issues"
   },
@@ -13,7 +13,7 @@
   "homepage": "https://github.com/agutoli/serverless-layers",
   "scripts": {
     "build": "BABEL_ENV=production ./bin/build",
-    "test": "NODE_ENV=test NODE_PATH=./src mocha 'tests/**/*.test.js' --colors --reporter spec",
+    "test": "NODE_ENV=test NODE_PATH=./src mocha 'tests/**/*.test.js' --colors --reporter spec -unhandled-rejections=strict",
     "lint": "eslint src/**/*.js",
     "dev:watch": "nodemon --watch ./src --exec 'npm run lint; npm run build'",
     "lint:watch": "nodemon --watch ./src --exec 'npm run lint'"
@@ -37,12 +37,11 @@
     "archiver": "^3.0.0",
     "bluebird": "^3.5.3",
     "chalk": "^3.0.0",
-    "copy": "^0.3.2",
     "folder-hash": "^3.3.0",
     "fs-copy-file": "^2.1.2",
     "fs-extra": "^8.1.0",
     "glob": "^7.1.6",
-    "mkdirp": "^0.5.1",
+    "mkdirp": "^0.5.6",
     "semver": "^7.3.2",
     "slugify": "^1.4.0"
   },
@@ -61,7 +60,7 @@
     "eslint-plugin-jsx-a11y": "^6.2.1",
     "eslint-plugin-react": "^7.12.4",
     "lodash.set": "^4.3.2",
-    "mocha": "^7.1.1",
+    "mocha": "^10.2.0",
     "nodemon": "^2.0.7",
     "pre-commit": "^1.2.2",
     "sinon": "^9.0.1"

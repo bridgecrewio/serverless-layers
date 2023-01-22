@@ -10,9 +10,11 @@ class NodeJSRuntime {
       runtimeDir,
       libraryFolder: 'node_modules',
       packageManager:  'npm',
+      packageManagerExtraArgs: '',
       dependenciesPath: 'package.json',
       dependenciesLockPath: 'package-lock.json',
       compatibleRuntimes: [runtimeDir],
+      compatibleArchitectures: parent.compatibleArchitectures,
       copyBeforeInstall: [
         '.npmrc',
         'yarn.lock',
@@ -25,7 +27,8 @@ class NodeJSRuntime {
 
     this.commands = {
       npm: 'npm install --production --only=prod',
-      yarn: 'yarn --production'
+      yarn: 'yarn --production',
+      pnpm: 'pnpm install --prod'
     };
   }
 

@@ -5,7 +5,8 @@
 [![Build Status](https://travis-ci.org/agutoli/serverless-layers.svg?branch=master)](https://travis-ci.org/agutoli/serverless-layers)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
 ![Node.js CI](https://github.com/agutoli/serverless-layers/workflows/Node.js%20CI/badge.svg)
-* It attaches automatically layers for each function
+* It attaches automatically layers to the provider and for each function
+    * it will skip functions with no other layers as they will use the layer(s) we added to the provider
 * It creates a new layer's version when `dependencies` is updated
 * If `dependencies` is not changed, it does not publish a new layer
 * It reduces drastically lambda size
@@ -90,6 +91,8 @@ functions:
 | compileDir     |  `string` | .serverless | Compilation directory |
 | layersDeploymentBucket | `string` |  | You can specify a bucket to upload lambda layers. `Required if deploymentBucket is not defined.` |
 | customInstallationCommand | `string` |  | It specify a custom command to install deps ex. `MY_ENV=1 npm --proxy http://myproxy.com i -P` |
+| customHash | `string` |  | Can specify custom string, that once changed will force a new build of the layer
+| retainVersions | `int` | `null` | Number of layer versions to keep, the rest versions will be removed after deployments |
 
 
 ## NodeJS
@@ -184,14 +187,21 @@ This plugin will setup follow options automatically if not specified at `serverl
 }
 ```
 
+## License
 
-## Contributing
+MIT
+
+## Contributors
 
 Yes, thank you!
 This plugin is community-driven, most of its features are from different authors.
 Please update the docs and tests and add your name to the package.json file.
 We try to follow [Airbnb's JavaScript Style Guide](https://github.com/airbnb/javascript).
 
-## License
+<!-- Copy-paste in your Readme.md file -->
 
-MIT
+<a href="https://github.com/agutoli/serverless-layers/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=agutoli/serverless-layers" />
+</a>
+
+Made with [contributors-img](https://contrib.rocks).

@@ -1,7 +1,5 @@
-export class ServerlessLayersConfig {
+class ServerlessLayersConfig {
   constructor(options) {
-    this.shouldNotInstallPackages = (options.shouldNotInstallPackages === 'true');
-
     this.shouldUseLayersArtifactory = (options.shouldUseLayersArtifactory === 'true');
     this.artifactoryBucketName = options.artifactoryBucketName;
     this.artifactoryRegion = options.artifactoryRegion;
@@ -26,3 +24,5 @@ export class ServerlessLayersConfig {
   }
 
 }
+
+module.exports = { ServerlessLayersConfig };

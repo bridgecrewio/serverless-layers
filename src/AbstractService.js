@@ -1,3 +1,4 @@
+const chalk = require('chalk');
 const path = require('path');
 
 class AbstractService {
@@ -8,6 +9,7 @@ class AbstractService {
     this.stackName = plugin.getStackName();
     this.layerName = plugin.getLayerName();
     this.bucketName = plugin.getBucketName();
+    this.bucketEncryption = plugin.getBucketEncryptiom();
     this.provider = this.plugin.provider;
 
     this.dependenceFilename = path.join(plugin.getBucketLayersPath(), this.plugin.settings.dependenciesPath);
@@ -16,6 +18,25 @@ class AbstractService {
     if (/^win/.test(process.platform)) {
       this.zipFileKeyName = this.zipFileKeyName.replace(/\\/g, '/');
       this.dependenceFilename = this.dependenceFilename.replace(/\\/g, '/');
+    }
+  }
+
+  async awsRequest(serviceAction, params, opts={}) {
+    const [service, action] = serviceAction.split(':');
+    if (!opts.checkError) {
+      return this.provider.request(service, action, params);
+    }
+
+    try {
+      const resp = await this.provider.request(service, action, params);
+      return resp;
+    }catch(e) {
+      console.log(chalk.red(`ServerlessLayers error:`));
+      console.log(`    Action: ${serviceAction}`);
+      console.log(`    Params: ${JSON.stringify(params)}`);
+      console.log(chalk.red(`AWS SDK error:`));
+      console.log(`    ${e.message}`);
+      process.exit(1);
     }
   }
 

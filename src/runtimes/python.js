@@ -11,8 +11,10 @@ class PythonRuntime {
       runtimeDir,
       libraryFolder: 'site-packages',
       packageManager:  'pip',
+      packageManagerExtraArgs: '',
       dependenciesPath: 'requirements.txt',
       compatibleRuntimes: [runtime],
+      compatibleArchitectures: parent.compatibleArchitectures,
       copyBeforeInstall: [],
       packageExclude: [
         'package.json',

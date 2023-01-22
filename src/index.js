@@ -39,6 +39,9 @@ class ServerlessLayers {
       'after:deploy:function:deploy': () => BbPromise.bind(this)
         .then(() => this.init())
         .then(() => this.finalizeDeploy()),
+      'after:deploy:deploy': () => BbPromise.bind(this)
+        .then(() => this.init())
+        .then(() => this.cleanUpLayerVersions()),
       'plugin:uninstall:uninstall': () => BbPromise.bind(this)
         .then(() => {
           return this.init()
@@ -96,7 +99,7 @@ class ServerlessLayers {
       await this.main();
     }
 
-    console.log('\n');
+    this.breakLine();
   }
 
   async cleanUpAllLayers() {
@@ -116,6 +119,30 @@ class ServerlessLayers {
     }
   }
 
+  async cleanUpLayerVersions() {
+    this.runtimes = new Runtimes(this);
+    const settings = this.getSettings();
+
+    for (const layerName in settings) {
+      const currentSettings = settings[layerName];
+      this.logGroup(layerName);
+
+      if (currentSettings.arn) {
+        this.warn(` (skipped) arn: ${currentSettings.arn}`);
+        continue;
+      }
+
+      if (!currentSettings.retainVersions) {
+        continue;
+      }
+
+      this.log('Cleaning up layer versions...');
+
+      await this.initServices(layerName, currentSettings);
+      await this.cleanUpLayers(currentSettings.retainVersions);
+    }
+  }
+
   async initServices(layerName, settings) {
     this.currentLayerName = layerName;
     this.settings = settings;
@@ -131,14 +158,23 @@ class ServerlessLayers {
   }
 
   mergeCommonSettings(inboundSetting) {
+    const { deploymentBucketObject } = this.service.provider;
+
+    let layersDeploymentBucketEncryption;
+    if (deploymentBucketObject) {
+      layersDeploymentBucketEncryption = deploymentBucketObject.serverSideEncryption;
+    }
+
     return {
       path: '.',
       functions: null,
       forceInstall: false,
+      retainVersions: null,
       dependencyInstall: true,
       compileDir: '.serverless',
       customInstallationCommand: null,
       layersDeploymentBucket: this.service.provider.deploymentBucket,
+      layersDeploymentBucketEncryption,
       ...this.runtimes.getDefaultSettings(inboundSetting)
     };
   }
@@ -265,7 +301,7 @@ class ServerlessLayers {
       hasZipChanged = await this.zipService.hasZipChanged();
     }
 
-    const hashCustomHashChanged = await this.hasCustomHashChanged();
+    const hasCustomHashChanged = await this.hasCustomHashChanged();
 
     // It checks if something has changed
     const verifyChanges = [
@@ -273,7 +309,7 @@ class ServerlessLayers {
       hasDepsChanges,
       hasFoldersChanges,
       hasSettingsChanges,
-      hashCustomHashChanged
+      hasCustomHashChanged
     ].some(x => x === true);
 
     // merge package default options
@@ -337,6 +373,10 @@ class ServerlessLayers {
 
   getStackName() {
     return this.provider.naming.getStackName();
+  }
+
+  getBucketEncryptiom() {
+    return this.settings.layersDeploymentBucketEncryption;
   }
 
   getBucketName() {
@@ -429,26 +469,45 @@ class ServerlessLayers {
     const funcs = this.settings.functions;
     const cliOpts = this.provider.options;
 
-    Object.keys(functions).forEach(funcName => {
-      if (cliOpts.function && cliOpts.function !== funcName) {
-        return;
+    // Attaches to provider level when
+    // no functions available. It happens when
+    // someone want to use serverless to create all layers
+    // or resources but not the functions.
+    if (!functions || Object.keys(functions).length === 0) {
+      // Simple validations when layers attribute is null.
+      if (!this.service.provider.layers) {
+        this.service.provider.layers = []
       }
+
+      this.service.provider.layers.push(layerArn);
+
+      this.log(
+        `${chalk.magenta.bold('provider')} - ${this.logArn(layerArn)}`,
+        ' ✓'
+      );
+    } else {
+      Object.keys(functions).forEach(funcName => {
+        if (cliOpts.function && cliOpts.function !== funcName) {
+          return;
+        }
 
       let isEnabled = !funcs;
 
-      if (Array.isArray(funcs) && funcs.indexOf(funcName) !== -1) {
-        isEnabled = true;
-      }
+        if (Array.isArray(funcs) && funcs.indexOf(funcName) !== -1) {
+          isEnabled = true;
+        }
 
-      if (isEnabled) {
-        functions[funcName].layers = functions[funcName].layers || [];
-        functions[funcName].layers.push(layerArn);
-        functions[funcName].layers = Array.from(new Set(functions[funcName].layers));
-        this.log(`function.${chalk.magenta.bold(funcName)} - ${this.logArn(layerArn)}`, ' ✓');
-      } else {
-        this.warn(`(Skipped) function.${chalk.magenta.bold(funcName)}`, ' x');
-      }
-    });
+        if (isEnabled) {
+          // if this function has other layers add ours too so it applies
+          functions[funcName].layers = functions[funcName].layers || [];
+          functions[funcName].layers.push(layerArn);
+          functions[funcName].layers = Array.from(new Set(functions[funcName].layers));
+          this.log(`function.${chalk.magenta.bold(funcName)} - ${this.logArn(layerArn)}`, ' ✓');
+        } else {
+          this.warn(`(Skipped) function.${chalk.magenta.bold(funcName)}`, ` x`);
+        }
+      });
+    }
 
     this.service.resources = this.service.resources || {};
     this.service.resources.Outputs = this.service.resources.Outputs || {};
@@ -491,7 +550,7 @@ class ServerlessLayers {
         this.log(`function.${chalk.magenta.bold(funcName)} = layers.${this.logArn(currentLayerARN)}`);
       });
     });
-    console.log('\n');
+    this.breakLine();
   }
 
   log(msg, signal = ' ○') {
@@ -499,7 +558,7 @@ class ServerlessLayers {
   }
 
   logGroup(msg) {
-    console.log('\n');
+    this.breakLine();
     this.serverless.cli.log(`[ LayersPlugin ]: ${chalk.magenta.bold('=>')} ${chalk.greenBright.bold(msg)}`);
   }
 
@@ -511,8 +570,12 @@ class ServerlessLayers {
     console.log(`...${chalk.red(`${signal} ${chalk.white.bold(msg)}`)}`);
   }
 
-  cleanUpLayers() {
-    return this.layersService.cleanUpLayers();
+  cleanUpLayers(retainVersions) {
+    return this.layersService.cleanUpLayers(retainVersions);
+  }
+
+  breakLine() {
+    console.log('\n');
   }
 
   logArn(arn) {

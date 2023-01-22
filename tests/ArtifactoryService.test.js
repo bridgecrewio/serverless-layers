@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { ArtifactoryService } = require('../lib/artifactory/ArtifactoryService');
+const { ArtifactoryService } = require('../src/artifactory/ArtifactoryService');
 
 describe('ArtifactoryService Tests', () => {
   afterEach(() => {

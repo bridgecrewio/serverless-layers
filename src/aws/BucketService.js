@@ -19,17 +19,14 @@ class UploadService extends AbstractService {
     const params = {
       Bucket: this.bucketName,
       Key: this.zipFileKeyName,
+      ServerSideEncryption: this.plugin.getBucketEncryptiom(),
       Body: fs.createReadStream(this.plugin.getPathZipFileName())
     };
 
-    return this.provider.request('S3', 'putObject', params)
+    return this.awsRequest('S3:putObject', params, { checkError: true })
       .then((result) => {
         this.plugin.log('OK...');
         return result;
-      })
-      .catch(e => {
-        console.log(e.message);
-        process.exit(1);
       });
   }
 
@@ -46,17 +43,14 @@ class UploadService extends AbstractService {
     const params = {
       Body,
       Bucket: this.bucketName,
-      Key: this.keyPath(file.getKey())
+      Key: this.keyPath(file.getKey()),
+      ServerSideEncryption: this.plugin.getBucketEncryptiom()
     };
 
-    return this.provider.request('S3', 'putObject', params)
+    return this.awsRequest('S3:putObject', params, { checkError: true })
       .then((result) => {
         this.plugin.log('OK...');
         return result;
-      })
-      .catch(e => {
-        console.log(e.message);
-        process.exit(1);
       });
   }
 
@@ -69,10 +63,10 @@ class UploadService extends AbstractService {
       Key: this.keyPath(file.getKey())
     };
 
-    return this.provider.request('S3', 'getObject', params)
+    return this.awsRequest('S3:getObject', params)
       .then((result) => result.Body.toString())
-      .catch(() => {
-        this.plugin.log(`${filename} does not exists at bucket...`);
+      .catch((e) => {
+        this.plugin.log(`${filename} ${e.message}.`);
         return null;
       });
   }
@@ -85,17 +79,14 @@ class UploadService extends AbstractService {
     const params = {
       Bucket: this.bucketName,
       Key: this.dependenceFilename,
+      ServerSideEncryption: this.plugin.getBucketEncryptiom(),
       Body: fs.createReadStream(this.plugin.settings.dependenciesPath)
     };
 
-    return this.provider.request('S3', 'putObject', params)
+    return this.awsRequest('S3:putObject', params, { checkError: true })
       .then((result) => {
         this.plugin.log('OK...');
         return result;
-      })
-      .catch(e => {
-        console.log(e.message);
-        process.exit(1);
       });
   }
 
@@ -108,10 +99,10 @@ class UploadService extends AbstractService {
       Key: this.dependenceFilename
     };
 
-    return this.provider.request('S3', 'getObject', params)
+    return this.awsRequest('S3:getObject', params)
       .then((result) => result.Body.toString())
-      .catch(() => {
-        this.plugin.log(`${dependenciesPath} does not exists at bucket...`);
+      .catch((e) => {
+        this.plugin.log(`${dependenciesPath} ${e.message}.`);
         return null;
       });
   }

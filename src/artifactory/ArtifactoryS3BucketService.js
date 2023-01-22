@@ -1,8 +1,8 @@
-import * as AWS from 'aws-sdk';
+const AWS = require('aws-sdk');
 
 const fs = require('fs');
 
-export class ArtifactoryS3BucketService {
+class ArtifactoryS3BucketService {
   constructor(serverlessLayersConfig) {
     this.serverlessLayersConfig = serverlessLayersConfig;
     this.s3Client = {};
@@ -82,3 +82,5 @@ export class ArtifactoryS3BucketService {
     console.debug(`[ LayersPlugin - Artifacts ]: file ${this.serverlessLayersConfig.artifactoryZipKey} was uploaded to ${this.serverlessLayersConfig.artifactoryBucketName}, response is: ${JSON.stringify(response)}`);
   }
 }
+
+module.exports = { ArtifactoryS3BucketService };
