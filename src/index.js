@@ -145,20 +145,20 @@ class ServerlessLayers {
   }
 
   async uploadUpdatedPackagesFiles() {
-    this.log('Going to upload updated dependencies files after successful deployment');
+    this.log('[ LayersPlugin ]: Going to upload updated dependencies files after successful deployment');
 
     const hashFileName = this.slsLayersConfig.hashFileName;
-    this.log(`Going to upload custom hash name ${hashFileName}`);
+    this.log(`[ LayersPlugin ]: Going to upload custom hash name ${hashFileName}`);
     await this.bucketService.putFile(
       hashFileName, JSON.stringify({ hash: this.settings.customHash })
     );
 
-    this.log(`Going to upload dependencies file ${this.dependencies.getDepsPath()}`);
+    this.log(`[ LayersPlugin ]: Going to upload dependencies file ${this.dependencies.getDepsPath()}`);
     await this.bucketService.putFile(this.dependencies.getDepsPath());
 
-    this.log(`Going to upload dependencies lock file ${this.settings.dependenciesLockPath}`);
+    this.log(`[ LayersPlugin ]: Going to upload dependencies lock file ${this.settings.dependenciesLockPath}`);
     await this.bucketService.putFile(this.settings.dependenciesLockPath);
-    this.log('Dependencies files uploaded');
+    this.log('[ LayersPlugin ]: Dependencies files were uploaded successfully');
   }
 
   async initServices(layerName, settings) {
@@ -537,7 +537,7 @@ class ServerlessLayers {
       [outputName]: {
         Value: layerArn,
         Export: {
-          Name: outputName
+          Name: `${outputName}-${this.slsLayersConfig.uniqueTag}`
         }
       }
     });

@@ -33,6 +33,19 @@ class ArtifactoryService {
 
     return layerVersionArn;
   }
+
+  //resources:
+  //   Outputs:
+  //     BcDashinfrastructureDashartifactoryDashnodejsDashcommonLambdaLayerQualifiedArn:
+  //     Bc-infrastructure-artifactory-nodejs-commonLambdaLayerQualifiedArn:
+  //       Value:
+  //         Ref: arn:aws:lambda:us-west-2:890234264427:layer:bc-infrastructure-artifactory-nodejs-common:108
+  //       Export:
+  //         Name: test-${opt:tag}
+
+  updateExportNameInServerlessFileForLayerArn() {
+
+  }
 }
 
 module.exports = { ArtifactoryService };
