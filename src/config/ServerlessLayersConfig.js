@@ -1,6 +1,7 @@
 class ServerlessLayersConfig {
   constructor(options) {
     this.shouldUseLayersArtifactory = (options.shouldUseLayersArtifactory === 'true');
+    this.hashFileName = 'customHash.json';
     this.artifactoryBucketName = options.artifactoryBucketName;
     this.artifactoryRegion = options.artifactoryRegion;
 
@@ -22,7 +23,6 @@ class ServerlessLayersConfig {
     this.artifactoryZipKey = `${this.artifactoryLayerName}/${this.artifactoryLayerName}.zip`;
     this.tempArtifactoryZipFileName = `${this.artifactoryLayerName}.zip`;
   }
-
 }
 
 module.exports = { ServerlessLayersConfig };
