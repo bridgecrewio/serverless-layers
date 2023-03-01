@@ -533,6 +533,8 @@ class ServerlessLayers {
 
     const outputName = this.getOutputLogicalId(layerName);
 
+    console.log(`[ LayersPlugin ]: going to export output layer arn ${layerArn} with the name of ${outputName}-${this.slsLayersConfig.uniqueTag}`);
+
     Object.assign(this.service.resources.Outputs, {
       [outputName]: {
         Value: layerArn,
