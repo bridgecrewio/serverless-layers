@@ -543,6 +543,8 @@ class ServerlessLayers {
         }
       }
     });
+
+    console.log(`[ LayersPlugin ]: service.resources.Outputs after assign ${JSON.stringify(this.service.resources.Outputs)}`);
   }
 
   getDependenciesList() {
