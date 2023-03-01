@@ -536,11 +536,12 @@ class ServerlessLayers {
 
     console.log(`[ LayersPlugin ]: going to export output layer arn ${layerArn} with the name of ${outputName}-${this.slsLayersConfig.uniqueTag}`);
 
+    const exportName = this.slsLayersConfig.shouldUseLayersArtifactory ? `${outputName}-${this.slsLayersConfig.uniqueTag}` : outputName;
     Object.assign(this.service.resources.Outputs, {
       [outputName]: {
         Value: layerArn,
         Export: {
-          Name: `${outputName}-${this.slsLayersConfig.uniqueTag}`
+          Name: exportName
         }
       }
     });
