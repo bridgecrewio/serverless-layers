@@ -351,6 +351,8 @@ class ServerlessLayers {
       return;
     }
 
+    this.log('[ LayersPlugin ]: Changes identified');
+
     // ENABLED by default
     if (dependencyInstall && !artifact && !this.slsLayersConfig.shouldUseLayersArtifactory) {
       this.log('Going to install packages...');
@@ -382,7 +384,6 @@ class ServerlessLayers {
 
   getLayerName() {
     const stackName = this.getStackName();
-    console.log(`[ LayersPlugin ]: going to generate layer name, stackName is - ${stackName}`);
     const { runtimeDir } = this.settings;
     return slugify(`${stackName}-${runtimeDir}-${this.currentLayerName}`, {
       lower: true,
