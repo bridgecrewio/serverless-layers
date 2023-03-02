@@ -351,7 +351,14 @@ class ServerlessLayers {
       return;
     }
 
-    this.log('[ LayersPlugin ]: Changes identified');
+    const changeIndications = {
+      hasZipChanged,
+      hasDepsChanges,
+      hasFoldersChanges,
+      hasSettingsChanges,
+      hasCustomHashChanged
+    };
+    this.log(`[ LayersPlugin ]: Changes identified ${JSON.stringify(changeIndications)}`);
 
     // ENABLED by default
     if (dependencyInstall && !artifact && !this.slsLayersConfig.shouldUseLayersArtifactory) {
