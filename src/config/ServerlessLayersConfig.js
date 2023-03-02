@@ -1,6 +1,21 @@
 class ServerlessLayersConfig {
-  constructor(options) {
+  constructor(options, slsVersion) {
+    console.log(`[ LayersPlugin ]: - options are: ${JSON.stringify(options)}, sls version is ${slsVersion}`);
+
+    if (slsVersion.startsWith('3')) {
+      const v3Options = {};
+      options.param.forEach((v3Option) => {
+        console.log(`option of v3 is: ${v3Option}`);
+        const v3OptionSplitArr = v3Option.split('=');
+        // @ts-ignore
+        // eslint-disable-next-line prefer-destructuring
+        v3Options[v3OptionSplitArr[0]] = v3OptionSplitArr[1];
+      });
+      options = v3Options;
+    }
+
     this.shouldUseLayersArtifactory = (options.shouldUseLayersArtifactory === 'true');
+    console.log(`options shouldUseLayersArtifactory - ${options.shouldUseLayersArtifactory}, typeof options.shouldUseLayersArtifactory ${typeof options.shouldUseLayersArtifactory} (options.shouldUseLayersArtifactory === 'true') ? ${(options.shouldUseLayersArtifactory === 'true')}`);
     this.hashFileName = 'customHash.json';
     this.artifactoryBucketName = options.artifactoryBucketName;
     this.artifactoryRegion = options.artifactoryRegion;

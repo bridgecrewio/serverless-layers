@@ -70,9 +70,13 @@ class ArtifactoryS3BucketService {
   async uploadLayerZipFile(zipFileName) {
     console.debug(`[ LayersPlugin - Artifacts ]: going to upload file ${zipFileName} to ${this.serverlessLayersConfig.artifactoryBucketName} bucket for key ${this.serverlessLayersConfig.artifactoryZipKey}`);
 
-    console.debug(`[ LayersPlugin - Artifacts ]: cwd: ${process.cwd()}, going to list files for path ${this.currentPath}`);
-    const files = fs.readdirSync(this.currentPath);
-    console.debug(`[ LayersPlugin - Artifacts ]: cwd: ${process.cwd()}, ls for ${this.currentPath}: ${files}`);
+    console.debug(`[ LayersPlugin - Artifacts ]: going to list files for path ${this.currentPath}`);
+    let files = fs.readdirSync(this.currentPath);
+    console.debug(`[ LayersPlugin - Artifacts ]: ls for ${this.currentPath}: ${files}`);
+
+    console.debug(`[ LayersPlugin - Artifacts ]: cwd: ${process.cwd()}, going to list files for path ${process.cwd()}`);
+    files = fs.readdirSync(process.cwd());
+    console.debug(`[ LayersPlugin - Artifacts ]: cwd: ls for ${process.cwd()}: ${files}`);
 
     const zipFile = await fs.createReadStream(zipFileName);
 

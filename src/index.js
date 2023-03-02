@@ -19,7 +19,7 @@ class ServerlessLayers {
     this.options = options;
     this.serverless = serverless;
     this.initialized = false;
-    this.slsLayersConfig = new ServerlessLayersConfig(options);
+    this.slsLayersConfig = new ServerlessLayersConfig(options, serverless.version);
 
     // hooks
     this.hooks = {

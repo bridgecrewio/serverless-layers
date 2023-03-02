@@ -1,3 +1,4 @@
+const path = require('path');
 const { ArtifactoryS3BucketService } = require('./ArtifactoryS3BucketService');
 const { ArtifactoryLayerService } = require('./ArtifactoryLayerService');
 
@@ -6,7 +7,7 @@ class ArtifactoryService {
   constructor(serverlessLayersConfig, zipService, dependencies, plugin) {
     this.artifactoryS3BucketService = new ArtifactoryS3BucketService(serverlessLayersConfig, plugin.settings.path);
     this.artifactoryLayerService = new ArtifactoryLayerService(serverlessLayersConfig, plugin.settings.compatibleRuntimes);
-    this.tempArtifactoryZipFileName = serverlessLayersConfig.tempArtifactoryZipFileName;
+    this.tempArtifactoryZipFileName = `${path.join(process.cwd(), serverlessLayersConfig.tempArtifactoryZipFileName)}`;
     this.zipService = zipService;
     this.dependencies = dependencies;
   }
