@@ -3,9 +3,10 @@ const AWS = require('aws-sdk');
 const fs = require('fs');
 
 class ArtifactoryS3BucketService {
-  constructor(serverlessLayersConfig) {
+  constructor(serverlessLayersConfig, path) {
     this.serverlessLayersConfig = serverlessLayersConfig;
     this.s3Client = {};
+    this.currentPath = path;
   }
 
   initService() {
@@ -66,10 +67,14 @@ class ArtifactoryS3BucketService {
     });
   }
 
-  async uploadLayerZipFile() {
-    console.debug(`[ LayersPlugin - Artifacts ]: going to upload file ${this.serverlessLayersConfig.tempArtifactoryZipFileName} to ${this.serverlessLayersConfig.artifactoryBucketName} bucket for key ${this.serverlessLayersConfig.artifactoryZipKey}`);
+  async uploadLayerZipFile(zipFileName) {
+    console.debug(`[ LayersPlugin - Artifacts ]: going to upload file ${zipFileName} to ${this.serverlessLayersConfig.artifactoryBucketName} bucket for key ${this.serverlessLayersConfig.artifactoryZipKey}`);
 
-    const zipFile = await fs.createReadStream((this.serverlessLayersConfig.tempArtifactoryZipFileName));
+    console.debug(`[ LayersPlugin - Artifacts ]: cwd: ${process.cwd()}, going to list files for path ${this.currentPath}`);
+    const files = fs.readdirSync(this.currentPath);
+    console.debug(`[ LayersPlugin - Artifacts ]: cwd: ${process.cwd()}, ls for ${this.currentPath}: ${files}`);
+
+    const zipFile = await fs.createReadStream(zipFileName);
 
     const params = {
       Bucket: this.serverlessLayersConfig.artifactoryBucketName,

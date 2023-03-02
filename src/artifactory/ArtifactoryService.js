@@ -4,7 +4,7 @@ const { ArtifactoryLayerService } = require('./ArtifactoryLayerService');
 class ArtifactoryService {
 
   constructor(serverlessLayersConfig, zipService, dependencies, plugin) {
-    this.artifactoryS3BucketService = new ArtifactoryS3BucketService(serverlessLayersConfig);
+    this.artifactoryS3BucketService = new ArtifactoryS3BucketService(serverlessLayersConfig, plugin.settings.path);
     this.artifactoryLayerService = new ArtifactoryLayerService(serverlessLayersConfig, plugin.settings.compatibleRuntimes);
     this.tempArtifactoryZipFileName = serverlessLayersConfig.tempArtifactoryZipFileName;
     this.zipService = zipService;
@@ -26,7 +26,7 @@ class ArtifactoryService {
       console.log('[ LayersPlugin - Artifacts ]: hash does not exist in the artifactory, going to add new layer');
       await this.dependencies.install();
       await this.zipService.package(this.tempArtifactoryZipFileName);
-      await this.artifactoryS3BucketService.uploadLayerZipFile();
+      await this.artifactoryS3BucketService.uploadLayerZipFile(this.tempArtifactoryZipFileName);
       layerVersionArn = await this.artifactoryLayerService.publishLayerFromArtifactory();
       await this.artifactoryS3BucketService.uploadLayerHashMappingFile(layerVersionArn);
     }

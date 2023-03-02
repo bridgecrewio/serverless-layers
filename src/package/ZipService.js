@@ -52,6 +52,7 @@ class ZipService extends AbstractService {
   }
 
   package(zipFileName = this.plugin.getPathZipFileName()) {
+    this.plugin.log(`Going to zip ${zipFileName} `);
     const { compileDir, artifact } = this.plugin.settings;
     const layersDir = path.join(process.cwd(), compileDir);
 
