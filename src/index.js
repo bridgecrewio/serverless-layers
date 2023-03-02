@@ -145,7 +145,7 @@ class ServerlessLayers {
   }
 
   async uploadUpdatedPackagesFiles() {
-    this.log('[ LayersPlugin ]: Going to upload updated dependencies files after successful deployment');
+    this.log(`[ LayersPlugin ]: Going to upload updated dependencies files after successful deployment to bucket ${this.getBucketName()}`);
 
     const hashFileName = this.slsLayersConfig.hashFileName;
     this.log(`[ LayersPlugin ]: Going to upload custom hash name ${hashFileName}`);
