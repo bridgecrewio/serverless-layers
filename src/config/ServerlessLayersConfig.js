@@ -2,7 +2,7 @@ class ServerlessLayersConfig {
   constructor(options, slsVersion) {
     console.log(`[ LayersPlugin ]: - options are: ${JSON.stringify(options)}, sls version is ${slsVersion}`);
 
-    if (slsVersion.startsWith('3')) {
+    if (slsVersion.startsWith('3') && Object.entries(options).length > 0) {
       const v3Options = {};
       options.param.forEach((v3Option) => {
         console.log(`option of v3 is: ${v3Option}`);
