@@ -30,6 +30,8 @@ class ArtifactoryService {
       await this.artifactoryS3BucketService.uploadLayerZipFile(this.tempArtifactoryZipFileName);
       layerVersionArn = await this.artifactoryLayerService.publishLayerFromArtifactory();
       await this.artifactoryS3BucketService.uploadLayerHashMappingFile(layerVersionArn);
+    } else {
+      console.log('[ LayersPlugin - Artifacts ]: hash exists in the artifactory');
     }
 
     return layerVersionArn;
