@@ -451,9 +451,20 @@ class ServerlessLayers {
 
     if (!outputs) return null;
 
-    const logicalId = this.getOutputLogicalId(this.getLayerName());
+    // let exportName = '';
+    // if (this.slsLayersConfig.shouldUseLayersArtifactory) {
+    //   const logicalId = this.getOutputLogicalId(this.slsLayersConfig.artifactoryLayerName);
+    //   exportName = `${logicalId}-${this.slsLayersConfig.uniqueTag}`;
+    // } else {
+    //   exportName = this.getOutputLogicalId(this.getLayerName());
+    // }
 
-    const arn = (outputs.find(x => x.OutputKey === logicalId) || {}).OutputValue;
+    const layerName = this.slsLayersConfig.shouldUseLayersArtifactory ? this.slsLayersConfig.artifactoryLayerName : this.getLayerName();
+    const exportName = this.getOutputLogicalId(layerName);
+
+    console.log(`[ LayersPlugin ]: going to try and find if layer name ${layerName} with the export name ${exportName} is in outputs ${JSON.stringify(outputs)}`);
+
+    const arn = (outputs.find(x => x.OutputKey === exportName) || {}).OutputValue;
 
     // cache arn
     this.cacheObject.layersArn[this.currentLayerName] = arn;
