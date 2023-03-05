@@ -5,7 +5,7 @@ const ServerlessLayers = require('../src/index');
 
 describe('ServerlessLayersConfig Tests', () => {
   it('when options do not include any config', () => {
-    const serverlessLayerConfig = new ServerlessLayersConfig({});
+    const serverlessLayerConfig = new ServerlessLayersConfig({}, '2');
     expect(serverlessLayerConfig.shouldUseLayersArtifactory).to.false;
     expect(serverlessLayerConfig.artifactoryRegion).undefined;
     expect(serverlessLayerConfig.s3ArtifactoryAccessKeyId).undefined;
@@ -33,7 +33,35 @@ describe('ServerlessLayersConfig Tests', () => {
       organizationId: 'organization-id-test',
       tag: 'test',
       artifactoryStr: 'artifactory-test'
-    });
+    }, '2');
+
+    expect(serverlessLayerConfig.shouldUseLayersArtifactory).to.false;
+    expect(serverlessLayerConfig.artifactoryRegion).equals('us-west-2');
+    expect(serverlessLayerConfig.s3ArtifactoryAccessKeyId).equals('test_access_key');
+    expect(serverlessLayerConfig.s3ArtifactorySecretAccessKey).equals('test_secret_key');
+    expect(serverlessLayerConfig.s3ArtifactorySessionToken).equals('test_session_token');
+    expect(serverlessLayerConfig.uniqueTag).equals('test');
+    expect(serverlessLayerConfig.artifactoryStr).equals('artifactory-test');
+    expect(serverlessLayerConfig.artifactoryHashKey).equals('hash-key-test');
+    expect(serverlessLayerConfig.organizationId).equals('organization-id-test');
+    expect(serverlessLayerConfig.artifactoryLayerName).undefined;
+    expect(serverlessLayerConfig.artifactoryJsonMappingKey).undefined;
+    expect(serverlessLayerConfig.artifactoryZipKey).undefined;
+    expect(serverlessLayerConfig.tempArtifactoryZipFileName).undefined;
+
+    process.env.SLS_CODE_ARTIFACTS_AWS_ACCESS_KEY_ID = undefined;
+    process.env.SLS_CODE_ARTIFACTS_AWS_SECRET_ACCESS_KEY = undefined;
+    process.env.SLS_CODE_ARTIFACTS_AWS_SESSION_TOKEN = undefined;
+  });
+
+  it('when options include config with sls version 3', () => {
+    process.env.SLS_CODE_ARTIFACTS_AWS_ACCESS_KEY_ID = 'test_access_key';
+    process.env.SLS_CODE_ARTIFACTS_AWS_SECRET_ACCESS_KEY = 'test_secret_key';
+    process.env.SLS_CODE_ARTIFACTS_AWS_SESSION_TOKEN = 'test_session_token';
+    const serverlessLayerConfig = new ServerlessLayersConfig({
+      param: ['shouldUseLayersArtifactory=false', 'artifactoryRegion=us-west-2', 'artifactoryLayerName=artifactory-layer-test',
+        'artifactoryHashKey=hash-key-test', 'organizationId=organization-id-test', 'tag=test', 'artifactoryStr=artifactory-test']
+    }, '3');
 
     expect(serverlessLayerConfig.shouldUseLayersArtifactory).to.false;
     expect(serverlessLayerConfig.artifactoryRegion).equals('us-west-2');
@@ -59,8 +87,8 @@ describe('ServerlessLayersConfig Tests', () => {
       artifactoryLayerName: 'artifactory-layer-test',
       artifactoryHashKey: 'hash-key-test',
       tag: 'unique-tag'
-    });
-    const plugin = new ServerlessLayers({}, {});
+    }, '2');
+    const plugin = new ServerlessLayers({ version: '2' }, {});
     plugin.settings = {
       runtimeDir: 'nodejs',
     };
@@ -83,8 +111,8 @@ describe('ServerlessLayersConfig Tests', () => {
       artifactoryLayerName: 'artifactory-layer-test',
       artifactoryHashKey: 'hash-key-test',
       tag: 'some-tag'
-    });
-    const plugin = new ServerlessLayers({}, {});
+    }, '2');
+    const plugin = new ServerlessLayers({ version: '2' }, {});
     plugin.settings = {
       runtimeDir: 'nodejs',
     };
