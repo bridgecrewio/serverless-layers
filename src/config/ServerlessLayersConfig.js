@@ -15,7 +15,6 @@ class ServerlessLayersConfig {
     }
 
     this.shouldUseLayersArtifactory = (options.shouldUseLayersArtifactory === 'true');
-    console.log(`options shouldUseLayersArtifactory - ${options.shouldUseLayersArtifactory}, typeof options.shouldUseLayersArtifactory ${typeof options.shouldUseLayersArtifactory} (options.shouldUseLayersArtifactory === 'true') ? ${(options.shouldUseLayersArtifactory === 'true')}`);
     this.hashFileName = 'customHash.json';
     this.artifactoryBucketName = options.artifactoryBucketName;
     this.artifactoryRegion = options.artifactoryRegion;
@@ -38,6 +37,7 @@ class ServerlessLayersConfig {
     this.artifactoryZipKey = `${this.artifactoryLayerName}/${this.artifactoryLayerName}.zip`;
     this.tempArtifactoryZipFileName = `${this.artifactoryLayerName}.zip`;
   }
+
 }
 
 module.exports = { ServerlessLayersConfig };

@@ -5,7 +5,7 @@ const { ArtifactoryLayerService } = require('./ArtifactoryLayerService');
 class ArtifactoryService {
 
   constructor(serverlessLayersConfig, zipService, dependencies, plugin) {
-    this.artifactoryS3BucketService = new ArtifactoryS3BucketService(serverlessLayersConfig, plugin.settings.path);
+    this.artifactoryS3BucketService = new ArtifactoryS3BucketService(serverlessLayersConfig);
     this.artifactoryLayerService = new ArtifactoryLayerService(serverlessLayersConfig, plugin.settings.compatibleRuntimes);
     this.tempArtifactoryZipFileName = `${path.join(process.cwd(), serverlessLayersConfig.tempArtifactoryZipFileName)}`;
     this.zipService = zipService;
@@ -35,19 +35,6 @@ class ArtifactoryService {
     }
 
     return layerVersionArn;
-  }
-
-  //resources:
-  //   Outputs:
-  //     BcDashinfrastructureDashartifactoryDashnodejsDashcommonLambdaLayerQualifiedArn:
-  //     Bc-infrastructure-artifactory-nodejs-commonLambdaLayerQualifiedArn:
-  //       Value:
-  //         Ref: arn:aws:lambda:us-west-2:890234264427:layer:bc-infrastructure-artifactory-nodejs-common:108
-  //       Export:
-  //         Name: test-${opt:tag}
-
-  updateExportNameInServerlessFileForLayerArn() {
-
   }
 }
 
