@@ -10,6 +10,7 @@ class ServerlessLayersConfig {
         res[key] = value;
         return res;
       }, {});
+      console.log(`[ LayersPlugin ]: - options after extracting for v3 are: ${JSON.stringify(options)}`);
     }
 
     this.shouldUseLayersArtifactory = (options.shouldUseLayersArtifactory === 'true');
