@@ -2,16 +2,14 @@ class ServerlessLayersConfig {
   constructor(options, slsVersion) {
     console.log(`[ LayersPlugin ]: - options are: ${JSON.stringify(options)}, sls version is ${slsVersion}`);
 
-    if (slsVersion.startsWith('3') && Object.entries(options).length > 0) {
-      const v3Options = {};
-      options.param.forEach((v3Option) => {
-        console.log(`option of v3 is: ${v3Option}`);
+    if (this.shouldParseForSlsV3Options(slsVersion, options)) {
+      options = options.param.reduce((res, v3Option) => {
         const v3OptionSplitArr = v3Option.split('=');
-        // @ts-ignore
-        // eslint-disable-next-line prefer-destructuring
-        v3Options[v3OptionSplitArr[0]] = v3OptionSplitArr[1];
-      });
-      options = v3Options;
+        const key = v3OptionSplitArr[0];
+        const value = v3OptionSplitArr[1];
+        res[key] = value;
+        return res;
+      }, {});
     }
 
     this.shouldUseLayersArtifactory = (options.shouldUseLayersArtifactory === 'true');
@@ -28,6 +26,10 @@ class ServerlessLayersConfig {
     this.organizationId = options.organizationId;
     this.uniqueTag = options.tag;
     this.artifactoryStr = options.artifactoryStr ? options.artifactoryStr : 'artifactory';
+  }
+
+  shouldParseForSlsV3Options(slsVersion, options) {
+    return slsVersion.startsWith('3') && Object.entries(options).length > 0 && !!options.param;
   }
 
   init(plugin) {

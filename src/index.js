@@ -444,7 +444,7 @@ class ServerlessLayers {
     const layerName = this.slsLayersConfig.shouldUseLayersArtifactory ? this.slsLayersConfig.artifactoryLayerName : this.getLayerName();
     const exportName = this.getOutputLogicalId(layerName);
 
-    console.log(`[ LayersPlugin ]: going to try and find if layer name ${layerName} with the export name ${exportName} is in outputs ${JSON.stringify(outputs)}`);
+    console.log(`[ LayersPlugin ]: going to try and find if layer name ${layerName} with the export name ${exportName} is in outputs ${JSON.stringify(outputs, null, 2)}`);
 
     const arn = (outputs.find(x => x.OutputKey === exportName) || {}).OutputValue;
 
