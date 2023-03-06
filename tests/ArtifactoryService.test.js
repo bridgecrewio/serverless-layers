@@ -8,7 +8,7 @@ describe('ArtifactoryService Tests', () => {
   });
 
   it('when file is found in s3 artifactory bucket and returns a version arn', async () => {
-    const artifactoryService = new ArtifactoryService({}, {}, { settings: { compatibleRuntimes: [] } });
+    const artifactoryService = new ArtifactoryService({ tempArtifactoryZipFileName: 'temp' }, {}, {}, { settings: { compatibleRuntimes: [] } });
     sinon.stub(artifactoryService, 'initServices').callsFake(() => {
       artifactoryService.artifactoryS3BucketService = {
         downloadLayerHashMappingJsonFile: () => {
@@ -22,9 +22,13 @@ describe('ArtifactoryService Tests', () => {
   });
 
   it('when file is not found in s3 artifactory bucket - expect to run the whole flow', async () => {
-    const artifactoryService = new ArtifactoryService({}, {}, { settings: { compatibleRuntimes: [] } });
+    const artifactoryService = new ArtifactoryService({ tempArtifactoryZipFileName: 'temp' }, {}, {}, { settings: { compatibleRuntimes: [] } });
     sinon.stub(artifactoryService, 'zipService').value({
       package: () => Promise.resolve()
+    });
+
+    sinon.stub(artifactoryService, 'dependencies').value({
+      install: () => Promise.resolve()
     });
 
     sinon.stub(artifactoryService, 'initServices').callsFake(() => {
@@ -45,7 +49,7 @@ describe('ArtifactoryService Tests', () => {
   });
 
   it('one of the internal services throws exception - expect flow to fail and throw exception', async () => {
-    const artifactoryService = new ArtifactoryService({}, {}, { settings: { compatibleRuntimes: [] } });
+    const artifactoryService = new ArtifactoryService({ tempArtifactoryZipFileName: 'temp' }, {}, {}, { settings: { compatibleRuntimes: [] } });
     sinon.stub(artifactoryService, 'initServices').callsFake(() => {
       artifactoryService.artifactoryS3BucketService = {
         downloadLayerHashMappingJsonFile: () => {

@@ -73,7 +73,7 @@ describe('ServerlessLayers Tests', () => {
     });
 
     it('when no changes and not skip installation and no use artifactory - expect package zip, upload file to bucket, publish version and relate layer with functions', async () => {
-      plugin = new ServerlessLayers({}, {
+      plugin = new ServerlessLayers({ version: '2' }, {
         shouldUseLayersArtifactory: 'false'
       });
 
@@ -91,8 +91,7 @@ describe('ServerlessLayers Tests', () => {
       sinon.assert.calledOnce(zipPackageSpy);
       sinon.assert.calledOnce(bucketServiceUploadZipFileSpy);
       sinon.assert.calledOnce(layersServicePublishVersionSpy);
-      sinon.assert.calledWith(bucketServicePutFileSpy, 'test-path');
-      sinon.assert.calledWith(bucketServicePutFileSpy, 'package-lock.json');
+      sinon.assert.notCalled(bucketServicePutFileSpy);
       sinon.assert.notCalled(artifactoryLayerServiceSpy);
 
       expect(bucketServicePutFileSpy.calledWith('customHash.json', JSON.stringify({ hash: 'customHash' }))).not.to.be.true;
@@ -101,7 +100,7 @@ describe('ServerlessLayers Tests', () => {
     });
 
     it('when no changes and not skip installation and no use artifactory - expect using artifactory service', async () => {
-      plugin = new ServerlessLayers({}, {
+      plugin = new ServerlessLayers({ version: '2' }, {
         shouldUseLayersArtifactory: 'true'
       });
 
@@ -121,9 +120,7 @@ describe('ServerlessLayers Tests', () => {
       sinon.assert.notCalled(zipPackageSpy);
       sinon.assert.notCalled(bucketServiceUploadZipFileSpy);
       sinon.assert.notCalled(layersServicePublishVersionSpy);
-
-      sinon.assert.calledWith(bucketServicePutFileSpy, 'test-path');
-      sinon.assert.calledWith(bucketServicePutFileSpy, 'package-lock.json');
+      sinon.assert.notCalled(bucketServicePutFileSpy);
 
       sinon.assert.calledOnce(artifactoryLayerServiceSpy);
 

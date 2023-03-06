@@ -97,8 +97,7 @@ class NodeJSRuntime {
       const parsedRemotePackage = JSON.parse(remotePackage);
       const { dependencies, version } = parsedRemotePackage;
       this.plugin.log('Comparing package.json dependencies...');
-      const isDifferentPackageJson = await
-      this.isDiff(dependencies, this.localPackage.dependencies);
+      const isDifferentPackageJson = await this.isDiff(dependencies, this.localPackage.dependencies);
 
       let isDifferentPackageLock = false;
 
@@ -122,6 +121,8 @@ class NodeJSRuntime {
           isDifferentPackageLock = true;
         }
       }
+
+      this.plugin.log(`[ LayersPlugin ]: hasDependenciesChanges - version - ${version}, this.localPackage.version - ${this.localPackage.version}, isDifferentPackageJson - ${isDifferentPackageJson}, isDifferentPackageLock - ${isDifferentPackageLock}`);
       isDifferent = version !== this.localPackage.version
         || isDifferentPackageJson
         || isDifferentPackageLock;

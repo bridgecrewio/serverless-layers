@@ -19,7 +19,7 @@ class ServerlessLayers {
     this.options = options;
     this.serverless = serverless;
     this.initialized = false;
-    this.slsLayersConfig = new ServerlessLayersConfig(options);
+    this.slsLayersConfig = new ServerlessLayersConfig(options, serverless.version);
 
     // hooks
     this.hooks = {
@@ -41,7 +41,8 @@ class ServerlessLayers {
         .then(() => this.finalizeDeploy()),
       'after:deploy:deploy': () => BbPromise.bind(this)
         .then(() => this.init())
-        .then(() => this.cleanUpLayerVersions()),
+        .then(() => this.cleanUpLayerVersions())
+        .then(() => this.uploadUpdatedPackagesFiles()),
       'plugin:uninstall:uninstall': () => BbPromise.bind(this)
         .then(() => {
           return this.init()
@@ -143,6 +144,22 @@ class ServerlessLayers {
     }
   }
 
+  async uploadUpdatedPackagesFiles() {
+    this.log(`[ LayersPlugin ]: Going to upload updated dependencies files after successful deployment to bucket ${this.getBucketName()}`);
+
+    this.log(`[ LayersPlugin ]: Going to upload custom hash name ${this.slsLayersConfig.hashFileName}`);
+    await this.bucketService.putFile(
+      this.slsLayersConfig.hashFileName, JSON.stringify({ hash: this.settings.customHash })
+    );
+
+    this.log(`[ LayersPlugin ]: Going to upload dependencies file ${this.dependencies.getDepsPath()}`);
+    await this.bucketService.putFile(this.dependencies.getDepsPath());
+
+    this.log(`[ LayersPlugin ]: Going to upload dependencies lock file ${this.settings.dependenciesLockPath}`);
+    await this.bucketService.putFile(this.settings.dependenciesLockPath);
+    this.log('[ LayersPlugin ]: Dependencies files were uploaded successfully');
+  }
+
   async initServices(layerName, settings) {
     this.currentLayerName = layerName;
     this.settings = settings;
@@ -153,7 +170,7 @@ class ServerlessLayers {
     this.bucketService = new BucketService(this);
     this.cloudFormationService = new CloudFormationService(this);
     this.slsLayersConfig.init(this);
-    this.artifactoryLayerService = new ArtifactoryService(this.slsLayersConfig, this.zipService, this);
+    this.artifactoryLayerService = new ArtifactoryService(this.slsLayersConfig, this.zipService, this.dependencies, this);
     this.initialized = true;
   }
 
@@ -236,14 +253,11 @@ class ServerlessLayers {
       return false;
     }
 
-    const hashFileName = 'customHash.json';
+    const hashFileName = this.slsLayersConfig.hashFileName;
     const remoteHashFile = await this.bucketService.getFile(hashFileName);
 
     if (!remoteHashFile) {
       this.log('no previous custom hash found, putting new remote hash');
-      await this.bucketService.putFile(
-        hashFileName, JSON.stringify({ hash: this.settings.customHash })
-      );
       return true;
     }
 
@@ -252,9 +266,6 @@ class ServerlessLayers {
       return false;
     }
 
-    await this.bucketService.putFile(
-      hashFileName, JSON.stringify({ hash: this.settings.customHash })
-    );
     this.log('identified custom hash change!');
     return true;
   }
@@ -333,8 +344,18 @@ class ServerlessLayers {
       return;
     }
 
+    const changeIndications = {
+      hasZipChanged,
+      hasDepsChanges,
+      hasFoldersChanges,
+      hasSettingsChanges,
+      hasCustomHashChanged
+    };
+    this.log(`[ LayersPlugin ]: Changes identified, indications are ${JSON.stringify(changeIndications)}`);
+
     // ENABLED by default
-    if (dependencyInstall && !artifact) {
+    if (dependencyInstall && !artifact && !this.slsLayersConfig.shouldUseLayersArtifactory) {
+      this.log('Going to install packages...');
       await this.dependencies.install();
     }
 
@@ -355,15 +376,11 @@ class ServerlessLayers {
       layerVersionArn = version.LayerVersionArn;
     }
 
-    await this.bucketService.putFile(this.dependencies.getDepsPath());
-    await this.bucketService.putFile(this.settings.dependenciesLockPath);
-
     this.relateLayerWithFunctions(layerVersionArn, layerName);
   }
 
   getLayerName() {
     const stackName = this.getStackName();
-    console.log(`[ LayersPlugin ]: going to generate layer name, stackName is - ${stackName}`);
     const { runtimeDir } = this.settings;
     return slugify(`${stackName}-${runtimeDir}-${this.currentLayerName}`, {
       lower: true,
@@ -424,9 +441,12 @@ class ServerlessLayers {
 
     if (!outputs) return null;
 
-    const logicalId = this.getOutputLogicalId(this.getLayerName());
+    const layerName = this.slsLayersConfig.shouldUseLayersArtifactory ? this.slsLayersConfig.artifactoryLayerName : this.getLayerName();
+    const exportName = this.getOutputLogicalId(layerName);
 
-    const arn = (outputs.find(x => x.OutputKey === logicalId) || {}).OutputValue;
+    console.log(`[ LayersPlugin ]: going to try and find if layer name ${layerName} with the export name ${exportName} is in outputs ${JSON.stringify(outputs, null, 2)}`);
+
+    const arn = (outputs.find(x => x.OutputKey === exportName) || {}).OutputValue;
 
     // cache arn
     this.cacheObject.layersArn[this.currentLayerName] = arn;
@@ -514,14 +534,19 @@ class ServerlessLayers {
 
     const outputName = this.getOutputLogicalId(layerName);
 
+    const exportName = this.slsLayersConfig.shouldUseLayersArtifactory ? `${outputName}-${this.slsLayersConfig.uniqueTag}` : outputName;
+    console.log(`[ LayersPlugin ]: going to export output layer arn ${layerArn} with the name of ${exportName}`);
+
     Object.assign(this.service.resources.Outputs, {
       [outputName]: {
         Value: layerArn,
         Export: {
-          Name: outputName
+          Name: exportName
         }
       }
     });
+
+    console.log(`[ LayersPlugin ]: service.resources.Outputs after assign ${JSON.stringify(this.service.resources.Outputs)}`);
   }
 
   getDependenciesList() {

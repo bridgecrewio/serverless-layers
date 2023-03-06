@@ -8,7 +8,10 @@ class CloudFormationService extends AbstractService {
 
     return this.awsRequest('CloudFormation:describeStacks', params)
       .then(({ Stacks }) => Stacks && Stacks[0].Outputs)
-      .catch(() => []);
+      .catch((e) => {
+        console.error('error in describeStacks in cloud formation', e);
+        return [];
+      });
   }
 }
 
